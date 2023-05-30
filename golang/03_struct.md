@@ -50,7 +50,7 @@ Pi 3.141592
 
 In the above code we have created a variable `e` with zero value and constructed a variable `e2` with some value by using **struct literal construction**.
 
-We can also have an empty literal construction to create zero value struct which mainly used when we do not have the need to assign it to a variable, returning from a function or while passing it as a parameter to a function.
+We can also have an empty literal construction 'example{}' to create zero value struct which mainly used when we do not have the need to assign it to a variable, returning from a function or while passing it as a parameter to a function.
 
 ## Anonymous Struct
 ```
@@ -178,3 +178,9 @@ type example struct {
 ```
 
 But until and unless our profilling tool report about this memory issues, it is better to group all the fields in a Struct in a way which are related and better for the readability. 
+
+### Struct examples
+
+- Declare, create and initialize struct types: https://go.dev/play/p/djzGT1JtSwy
+- Anonymous struct types: https://go.dev/play/p/09cxjnmfcdC
+- Named vs Unnamed types: https://go.dev/play/p/ky91roJDjir

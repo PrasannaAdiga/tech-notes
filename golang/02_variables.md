@@ -17,6 +17,17 @@ https://github.com/ardanlabs/gotraining/tree/master/topics/go/language/variables
 - **Numeric**: int can be 8, 16 or 64 bits depending on the underlying architecture
 - **Float**: Float64
 - **Bool**:  0 or 1
+- int32 in Go is also called as `rune`
+
+Go has 3 different Types
+- Built-in types like numeric, float, bool, string and array
+- User defined type like Struct
+- Reference types like slices, maps, interfaces, functions and channels. We consider all reference type as nil when we set it to zero value.
+
+## String 
+- String is 2 word data structure with 1 byte of size where each word has 4 bit size. Here the first word is a pointer to the backing array and the second word is the total number of bytes.
+- For a zero value string, the first word will be a `nil` pointer and there are no bytes in the second word since we do not have any backing array yet.
+- For eaxmplae consider a string, a := "hello". Here the first word ponits to a backing array which has a value `h`, `e`, `l`, `l`, `o` and the second word has a number of byte value as `5`.
 
 ## Type Conversion
 Go does not have type casting, it has a type conversion instead. 
@@ -24,7 +35,6 @@ Go does not have type casting, it has a type conversion instead.
 - Where as type conversion is to create a new brand memory location for the new type.
 - Go support type conversion to have the integrity in place over the cost of the memory.
 
-## String 
-- String is 2 word data structure. Where the first word is a pointer to the backing array and the second word is the total number of bytes.
-- For a zero value string, the first word will be a `nil` pointer and there are no bytes in the second word since we do not have any backing array yet.
-- For eaxmplae consider a string, a := "hello". Here the first word ponits to a backing array which has a value `h`, `e`, `l`, `l`, `o` and the second word has a number of byte value as `5`.
+### Variable Examples
+
+- Declare and initialize variables: https://go.dev/play/p/xD_6ghgB7wm

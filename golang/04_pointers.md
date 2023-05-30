@@ -1,4 +1,5 @@
 # Pointers
+https://github.com/ardanlabs/gotraining/tree/master/topics/go/language/pointers
 
 Pointers provide a way to share data across program boundaries. Having the ability to share and reference data with a pointer provides the benefit of efficiency. There is only one copy of the data and everyone can see it changing. The cost is that anyone can change the data which can cause side effects in running programs.
 
@@ -205,3 +206,11 @@ Note: Stack memomry can not be shared across goroutines. Each stack memomry belo
 
 ### Stack vs Heap
 The stack is for data that needs to persist only for the lifetime of the function that constructs it, and is reclaimed without any cost when the function exits. The heap is for data that needs to persist after the function that constructs it exits, and is reclaimed by a sometimes costly garbage collection.
+
+### Pointers Examples:
+
+- Pass by Value: https://go.dev/play/p/9kxh18hd_BT
+- Sharing data I: https://go.dev/play/p/mJz5RINaimn
+- Sharing data II: https://go.dev/play/p/GpmPICMGMre
+- Escape Analysis: https://go.dev/play/p/BCtJrNRJGun
+- Stack grow: https://go.dev/play/p/vBKF2hXvKBb

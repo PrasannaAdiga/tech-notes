@@ -1,4 +1,6 @@
 # Constants
+https://github.com/ardanlabs/gotraining/tree/master/topics/go/language/constants
+
 Constants are a way to create a named identifier whose value can never change. 
 There are 2 varient of constants. Constants of kind and constants of type.
 
@@ -92,3 +94,10 @@ O/P:
 2: 0 1 2
 3: 1 2 3
 ```
+
+### Constants examples:
+
+- Declare and initialize constants: https://go.dev/play/p/z251qax3MYa
+- Parallel type system (Kind): https://go.dev/play/p/8a_tp97RHAf
+- iota: https://go.dev/play/p/SLAYYNFIdUA
+- Implicit conversion: https://go.dev/play/p/aB4NGcnZlw2
