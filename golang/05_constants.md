@@ -5,7 +5,7 @@ Constants are a way to create a named identifier whose value can never change.
 There are 2 varient of constants. Constants of kind and constants of type.
 
 - Constants are not variables.
-- They exist only at compilation.
+- They exist only at compilation. They never find themselves on a stack or on a heap.
 - Literal values in Go are constant of kind. For example 2, -5, 2.34 etc
 - Untyped constants or constants of a kind can be implicitly converted where typed constants or constants of type and variables can't.
 - Constants of a kind can be implicitly converted by the compiler, which means we can not have **Enumerations** in Go.

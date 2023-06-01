@@ -118,6 +118,7 @@ So basically as we make function calls we are going deeper into the stack. As we
 
 ### 3. Heaps
 We use Heap memory to store values, thats going to be shared across Go routine boundaries or any value that casting on the frame beacause there is an integrity issue, or any value where we do not know the size at the compile time.
+for example `s := make([]byte, n)`. Here value of length `n` is unknown during compilation and hence during runtime depending on the actual value of `n` this value `s` will be created on Heap.
 
 ## Escape Analysis
 
