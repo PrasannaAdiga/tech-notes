@@ -8,6 +8,7 @@ Embedding types provide the final piece of sharing and reusing state and behavio
 - This is not inheritance.
 - Through promotion, inner type fields and methods can be accessed through the outer type.
 - The outer type can override the inner type's behavior.
+- Always embed types for behavior instead of state.
 
 ```
 // Sample program to show how what we are doing is NOT embedding
