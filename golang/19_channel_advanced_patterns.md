@@ -1,3 +1,49 @@
+# Pipeline Pattern
+- Go's concurrency primitives makes it easy to construct streaming pipelines. That enables us to make an efficient use of the I/O and the multiple CPU cores available on the machine, to run our computation faster. - Pipelines are often used to process streams or batches of data.
+- Pipeline is a series of stages that are connected by the channels, where each stage is represented by
+a goroutine.
+- A goroutine takes the data from an in-bound channel, performs an operation on it and sends the data
+on the out-bound channel, that can be used by the next stage.
+- By using pipelines, we can separate the concerns of each stage, and process individual stages concurrently.
+Stages could consume and return the same type.
+
+Example:
+```
+package main
+
+import "fmt"
+
+func generator(nums ...int) <-chan int {
+	out := make(chan int)
+
+	go func() {
+		for _, n := range nums {
+			out <- n
+		}
+		close(out)
+	}()
+	return out
+}
+
+func square(in <-chan int) <-chan int {
+	out := make(chan int)
+	go func() {
+		for n := range in {
+			out <- n * n
+		}
+		close(out)
+	}()
+	return out
+}
+
+func main() {
+	// set up the pipeline
+	for n := range square(square(generator(2, 3))) {
+		fmt.Println(n)
+	}
+}
+```
+
 # Pooling Pattern
 
 In Go we usually no need to create any pools of goroutines, since Go schedule is very intelligent and those Ps are kind of like pools of Goroutines already. There may be times where you have a limited resource that has to require limited access to something and you might need to limit access to something through a pool.

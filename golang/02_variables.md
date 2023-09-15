@@ -5,6 +5,7 @@ https://github.com/ardanlabs/gotraining/tree/master/topics/go/language/variables
 - In Go, access to memory is type safe. This means the compiler takes type seriously and will not allow us to use variables outside the scope of how they are declared.
 - When variables are being declared to their zero value, use the keyword var.
 - When variables are being declared and initialized, use the short variable declaration operator.
+- Variables names should start with a letter or an underscore. Unicode letters are also ok.
 
 ## Declaration and Initialization
 - var a string - **zero value** decalaration

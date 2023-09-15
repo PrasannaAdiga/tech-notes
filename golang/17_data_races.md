@@ -342,6 +342,116 @@ So every time we write, we stop all the reads, we modify, and we start reading a
 
 ![stack_heap](images/mutex.drawio.png "icon")
 
+## Synchronization with Conditional Varibale
+- Conditional variable is one of the synchronization mechanisms, a conditional variable is basically a container of goroutines that are waiting for a certain condition.
+- The question is, how can we make a goroutine wait till some event or condition occurs, one way could be
+to wait in a loop for the condition to become true.
+- In the code snippet as shown in the attached below first screenshot, we have a shared resource, a map that is being shared between the goroutines. And the consumer goroutine, needs to wait for the shared map to be populated before processing it.
+- So first we will acquire a lock. We check for the condition whether the shared map is populated by checking the length of the map. If it is not populated, then we release the lock, sleep for an arbitrary duration of time and again acquire alock. And check for the condition again. This is quite inefficient, right?
+- What we need is we need some way to make the goroutine suspend while waiting, and some way to signal
+the suspended goroutine that, that particular event has occurred.
+- Can we use channels? We can use channels to block the goroutine on receive and sender goroutine to indicate the occurrence of the event. But what if there are multiple goroutines waiting on multiple conditions?
+- That's where conditional variables comes into the picture.
+- Conditional variables are of type sync.Cond, we use the constructor method, NewCond() to create a conditional variable, and it takes a sync locker interface as input, which is usually a sync mutex.
+- And this is what allows the conditional variable to facilitate the coordination between the goroutines
+in a concurrent. safe way.
+- sync cond package contains three methods. **wait, signal and broadcast**. 
+- Wait method, suspends the execution of the calling thread, and it automatically releases the lock before suspending the goroutine. Wait does not return unless it is woken up by a broadcast or a signal.
+- Once it is woken up, it acquires the lock again. And on resume, the caller should check for the condition again, as it is very much possible that another goroutine could get scheduled between the signal and the resumption of wait and change the state of the condition. So this is why we check for the condition in a for loop.
+- Signal, signal wakes up one goroutine that was waiting on a condition.
+- The signal finds a goroutine that was waiting the longest and notifies that goroutine. And it is allowed, but not required for the caller to hold the lock during this call.
+- Broadcast, broadcast wakes up all the goroutine that were waiting on the condition, and again,
+it is allowed, but it is not required for the caller to hold the lock during this call.
+
+![stack_heap](images/channel-condition.png "icon")
+
+
+## Sync Once
+- sync once is used to run one time initialization functions, the Do method accepts the initialization function as its argument.
+- Sync once is useful in the creation of a singleton object or calling initialization functions, which multiple goroutines depends on, but we want the initialization function to run only once.
+
+Example
+```
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func main() {
+	var wg sync.WaitGroup
+	var once sync.Once
+
+	load := func() {
+		fmt.Println("Run only once initialization function")
+	}
+
+	wg.Add(10)
+	for i := 0; i < 10; i++ {
+		go func() {
+			defer wg.Done()
+
+			//load function gets called only once irrespective of how many goroutines are there.
+			once.Do(load)
+		}()
+	}
+	wg.Wait()
+}
+```
+
+## Sync Pool
+- Pool is commonly used to constrain the creation of expensive resources like the database connections network connections and memory.
+- We will maintain a pool of fixed number of instances of the resource and those resources from the pool will
+be reused rather than creating new instances each time whenever the caller requires them.
+- The caller, calls the get method, whenever it wants access to the resource. And this method will first check, whether there is any available instance within the pool.
+- If yes, then it returns that instance to the caller.
+- If not, then a new instance is created which is returned to the caller.
+- When finished with the usage, the caller, calls the put method, which places the instance back to
+the pool, which can be reused by other processes.
+- In this way, you can place a constraint on the creation of expensive resources.
+
+Example:
+```
+package main
+
+import (
+	"bytes"
+	"io"
+	"os"
+	"time"
+)
+
+//create pool of bytes.Buffers which can be reused, so that we can avoid creation of new instance of bytes.buffers by each goroutine
+
+var bufPool := sync.Pool {
+	New: func() interface{} {
+		fmt.Println("Allocating new bytes.Buffer")
+		return new(bytes.Buffer)
+	},
+}
+
+func log(w io.Writer, val string) {
+	b := bufPool.Get().(*bytes.Buffer)
+
+	b.Reset()
+
+	b.WriteString(time.Now().Format("15:04:05"))
+	b.WriteString(" : ")
+	b.WriteString(val)
+	b.WriteString("\n")
+
+	w.Write(b.Bytes())
+
+	bufPool.Put(b)
+}
+
+func main() {
+	log(os.Stdout, "debug-string1")
+	log(os.Stdout, "debug-string2")
+}
+```
+
 ## Race Detection
 Go's race detector tool is built-in in the `go build` or `go test` commands. 
 Run the command `go build -race`, which will detect and show all the data race issues in the code.
