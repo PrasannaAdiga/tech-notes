@@ -9,12 +9,21 @@ Error handling is about showing respect to the user of your API, giving your use
 
 There's two ways to shut down an application in Go. You can go to OS, the OS package, dot exit, and you can set a return code on that, that's the fastest way, or you can call the built in function panic. Now you'll choose one over the other depending on if you need a stack trace or not. So if you need the stack trace you're gonna call panic, if you don't you just call OS exit. But we've gotta design APIs and errors around the idea of giving the user enough context to make an informed decision.
 
-
-
 - Use the default error value for static and simple formatted messages.
 - Create and return error variables to help the caller identify specific errors.
 - Create custom error types when the context of the error is more complex.
 - Error Values in Go aren't special, they are just values like any other, and so you have the entire language at your disposal.
+- Errors are values in Go, just like any other return value from a function. In Go we dont generally consider errors as exceptional events. 
+
+**Ways to create an Error in Go**:
+```
+func main() {
+	err := errors.New("this is an error")
+
+	err2 := fmt.Errorf("this error wraps the first one: %w", err)
+	fmt.Println(err2)
+}
+```
 
 ## Default Error Values
 ```
@@ -305,6 +314,11 @@ func (c *client) BehaviorAsContext() {
 In the above code instead of asking for what is the concete data inside of err, does that concrete data also implement our temporary interface. So error value not only can have a state but it can also have behaviors. 
 And we can check against its data value or behavior.
 
+## Errors vs Panics
+- Errors result of an operation. Panic alters control flow, where the running function terminates immediately and the caller goes back to calling function.
+- Errors are easy to discover. Panics are relies on docs and reading code.
+- Errors implies that things didnt go as per the plan. Panic implies that program is in unstable state.
+- Errors are used freequently whre as Panics are used rarely. 
 
 ## Error Handling Examples:
 

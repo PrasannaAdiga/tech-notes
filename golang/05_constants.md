@@ -10,6 +10,19 @@ There are 2 varient of constants. Constants of kind and constants of type.
 - Untyped constants or constants of a kind can be implicitly converted where typed constants or constants of type and variables can't.
 - Constants of a kind can be implicitly converted by the compiler, which means we can not have **Enumerations** in Go.
 - Think of untyped constants as having a Kind, not a Type.
+- Unassigned constants recieve previous value
+```
+const (
+	a = "foo"
+	b  // Value is "foo"
+)
+```
+- We can assign expression, or concatinate operations to a Constant, since these are executes during compile time. But we can not assign a function call to a constant.
+```
+const c = 2 * 5
+const d = "hello" + "World"
+const e = someFunc() // wrong
+```
 
 ```
 // Sample program to show how to declare constants and their

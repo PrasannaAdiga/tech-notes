@@ -7,6 +7,15 @@ Pointers provide a way to share data across program boundaries. Having the abili
 - Values in Go are always pass by value.
 - "Value of", what's in the box. "Address of" ( & ), where is the box.
 - The (*) operator declares a pointer variable and the "Value that the pointer points to".
+- Ponters are primarily used to share memory. Use copies whenver possible.
+
+Example
+```
+ a := "foo"
+ b := &a // returns address of a 
+ *b = "bar" // dereference a pointer with * and updating the value
+ c = new(int) // built in 'new' function creates pointer to anonymous variable.
+```
 
 ## Pass By Value
 Everything in Go is pass by value.
@@ -215,3 +224,14 @@ The stack is for data that needs to persist only for the lifetime of the functio
 - Sharing data II: https://go.dev/play/p/GpmPICMGMre
 - Escape Analysis: https://go.dev/play/p/BCtJrNRJGun
 - Stack grow: https://go.dev/play/p/vBKF2hXvKBb
+
+### Simple CLI Program in Go
+```
+func main() {
+	fmt.Println("Provide an input and then hit a Enter button!")
+	in := bufio.NewReader(os.Stdin)
+	s, - := in.ReadString('\n') // read the whole string until hit the next line
+	s = strings.TrimSpace(s)
+	s = strings.ToUpper(s)
+	fmt.Println(s)  
+ }```

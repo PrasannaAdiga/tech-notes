@@ -12,6 +12,7 @@ Maps provide a data structure that allow for the storage and management of key/v
 - Maps can not be used in the zero value state where as slices can be used. Maos has to be constructed.
 - Maps also uses value semantics similar like slices
 - We can create a map either by using make function literal construction similar way how we do in slices.
+- Maps are copied by reference hence it is not comparable with other maps.
 
 ```
 // Sample program to show how to initialize a map, write to

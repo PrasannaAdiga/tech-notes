@@ -10,6 +10,7 @@ Slices are an incredibly important data structure in Go. They form the basis for
 - Slices allow for multiple "views" of the same underlying array.
 - Slices can grow through the use of the built-in function append.
 - Do not try to share the slice values, It is designed to stay on stack, designed to use value semantics and we should be making copy of it. 
+- Slices are copied by reference hence it is not comparable with other slices.
 
 There are 2 kinds of slices:
 - Nil slice: When we create a slice and set it to a zero value we get nil slice. Ex: `var data []string`. This is used along with while returning an error.

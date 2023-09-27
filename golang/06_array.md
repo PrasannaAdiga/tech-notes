@@ -3,6 +3,8 @@ https://github.com/ardanlabs/gotraining/tree/master/topics/go/language/arrays
 
 Go prefers data-oriented design principles over object-orienetd design principles.
 Go has only Arrays, Slices and Maps as data structure. It does not have any other data structures like Lists, Stacks, Queues ect
+- Arrays are copied by value
+- Arrays are comparable by each of its values 
 
 ## CPU Cache
 Hardware loves `Array` data structure because of its continuous memory location.

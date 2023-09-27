@@ -8,6 +8,12 @@ Methods are functions that give data the ability to exhibit behavior. Methods al
 - Value semantics mean a copy of the value is passed across program boundaries.
 - Pointer semantics mean a copy of the values address is passed across program boundaries.
 - Stick to a single semantic for a given type and be consistent.
+- A method in Go starts with custom types. Like `type myInt int`. Then we define a method to this type by using method receiver. Method indicates a tighter coupling between a function, type and variable.
+```
+func (i myInt) isEven() bool {
+	return int(i)%2 == 0
+}
+```
 
 ```
 // Sample program to show how to declare methods and how the Go
@@ -197,7 +203,28 @@ Here both f1 and f2 are decoupling not only the code that we want to execute, bu
 
 So when we decouple a piece of concrete data in Go, we are going to have the cost of indirection and allocation. So we have to make sure that if we are decoupling, that the cost of indirection and allocation is worth it. 
 
-We have got to learn when should data have behaviour and when it shoud not and data having behaviour is the exceptional cases and it is not a rule. 
+We have got to learn when should data have behaviour and when it shoud not and data having behaviour is the exceptional cases and it is not a rule.
+
+## Method Receivers
+Consider the below example:
+
+```
+type user struct {
+	id int
+	username string
+}
+
+func (u user) string() string {
+	return fmt.Sprintf("%v (%v)\n", u.username, u.id)  // value receiver
+}
+
+func (u *user) UpdateName(name string) {
+	u.username = name // pointer receiver
+}
+```
+In the value reciever mmode, we are not going to change the user object at all. So here we copy the user object and work on that copy.
+
+In the pointer receiver mmode, we are changing the username field of the actual user object and hence we are sharing the existing user object instead of working on a copy of the user object. So we generally want that change to be reflected in caller as well, which means we need to share the data between the caller and the method. So pointer receiver are used to share the variable between caller and method.  
 
 ### Method examples:
 Declare and receiver behavior: https://go.dev/play/p/-rK206XfGaV

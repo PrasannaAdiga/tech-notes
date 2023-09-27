@@ -263,6 +263,70 @@ Printer Name: Home XP-4100
 
 ![stack_heap](images/storage_by_value.drawio.png "icon")
 
+## Type Assertions
+Consider the below example
+```
+type Reader interface {
+	Read([]byte) (int, error)
+}
+
+type File struct {...}
+func (f File) Read(b []byte) (int, error) {...}
+
+var f File
+var r Reader = f
+
+var f2 File =  r //error, Go cant be sure this will work
+f2 = r.(File) // type assertion, panics upon failure, Here we say r is containing a concreete type File. If it does not contains the concrete type File, then program will panic out.
+
+// If we are not sure what is the underlying type, then we can use the type assertion with comma syntax.
+f2, ok := r.(File)
+```
+
+## Type Switch
+We can use special form of switch statement called type switch, if we have multiple different types. 
+```
+var f File
+var r Reader = f
+
+switch v := r.(type)
+case File:
+	// v is not File object
+case TCPConn:
+	// v is now TCPConn object
+default:
+	// this is selected if no types were matched	
+```
+
+## Generic Programming
+Whenver we assign a concrete type to an interface it looses its identity. For example File or TCPConn object to that Reader to an interface, it looses its identity. We no longer know for sure what concrete type we are working with. But by using Type Assertion and Type Switch we can get those concrete type, but those tend to be fairly heavy options for us to use. 
+
+But there are many times when we want our types to work polymorphically, but only for a specific period of time and after we are done with that polymorphic behaviour, we would like to get back to that concrete type. For this we use generic or Generic Programming.
+
+When we pass any concrete type through the interface, Go is going to convert it to an interface for example File concrete type will be converted to io.Reader. We no longer know what type we started with. With Generic Programming we are going to chage the model a little bit. We are going to start with the concrete type, we are going to have what is called a Generic Function. Within that generic function, we are going to allow our type to act as an io.Reader, but when its done we are going to get that File object back out. So that the Generic function is going to be able to work with Files and TCPConns, but at the end its going to return that concrete type back out. So we are going to know what we start with and know what we end with. 
+```
+func main() {
+	testScores := []float64 { // Or here we can use float32 type also
+		87.3,
+		10.2,
+		63.5,
+		78,
+	}
+
+	c := clone(testScores) // We can pass testScores of type []float64 or []float32 here
+
+	fmt.Println(&testScores[0], &c[0], c)
+}
+
+func clone[V any](s []V) []V {
+	result := make([]float64, len(s))
+	for i, v := range s {
+		result[i] = v
+	}
+	return result
+}
+```
+
 ## Interface examples:
 
 - Repetitive Code That Needs Polymorphism: https://go.dev/play/p/Txsuzcpdran

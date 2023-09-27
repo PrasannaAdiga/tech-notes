@@ -1,3 +1,232 @@
+# Non-blocking error channel
+- Use buffer channel for any kind of error channel, which will allow not to have any goroutine leaks for the error channel.
+
+# Encapsulating Goroutine
+- Channel in Go can have the value nil. An uninitialized channel variable does have the value nil. What happens if we try to send a message to an uninitialized channel? The application will panic. In the below code spippet shown in the screen shot the out and error channel we are receiving in the worker function and we are not sure whether the caller initialize these channels before sending.
+- For this we can encapsulate the goroutines, so that worker function will be called synchronously and then worker function will create these out and error channel by initializing and returning them to caller.
+
+![stack_heap](images/non_blocking_error_channel.drawio.png "icon")
+
+# Foundational Concurrency patterns
+- Single producer, single consumer
+- Single producer, multiple consumer
+- multiple producer, single consumer
+- multiple producer, multiple consumer
+
+# Generator Pattern
+Function that returns a channel. Channels are first class value, just like strings or integers
+
+```
+func main() {
+    joe := boring("Joe") // Function returning a channel
+    ann := boring("Ann")
+    for i := 0; i < 5; i++ {
+        fmt.Println(<-joe) // Note here ann is blocked until joe read the value. This can be 
+						   // eliminated by using fan-in/multiplexing pattern
+        fmt.Println(<-ann)
+    }
+    fmt.Println("You're both boring; I'm leaving.")
+}
+
+func boring(msg string) <-chan string { // Returns receive-only channel of strings.
+    c := make(chan string)
+    go func() { // We launch the goroutine from inside the function.
+        for i := 0; ; i++ {
+            c <- fmt.Sprintf("%s %d", msg, i)
+            time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
+        }
+    }()
+    return c // Return the channel to the caller.
+}
+```
+
+# Fan-in or Multiplexing pattern
+The above generator pattern makes Joe and Ann wait for other one to complete.
+We can instead use a fan-in function to let whosoever is ready talk.
+
+```
+func fanIn(input1, input2 <-chan string) <-chan string {
+    c := make(chan string)
+    go func() { for { c <- <-input1 } }()
+    go func() { for { c <- <-input2 } }()
+    return c
+}
+func fanInSimple(cs ...<-chan string) <-chan string { // By using for-range
+	c := make(chan string)
+	for _, ci := range cs { // spawn channel based on the number of input channel
+		go func(cv <-chan string) { // cv is a channel value
+			for {
+				c <- <-cv
+			}
+		}(ci) // send each channel to
+	}
+	return c
+}
+func fanInSimple(input1, input2 <-chan string) <-chan string { // By using select clause
+	c := make(chan string)
+	go func() {
+        for {
+            select {
+            case s := <-input1:  c <- s
+            case s := <-input2:  c <- s
+            }
+        }
+    }()
+	return c
+}
+func main() {
+    c := fanIn(boring("Joe"), boring("Ann"))
+    for i := 0; i < 10; i++ {
+        fmt.Println(<-c)
+    }
+    fmt.Println("You're both boring; I'm leaving.")
+}
+```
+
+# Slect-timeout
+```
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+// the boring function return a channel to communicate with it.
+func boring(msg string) <-chan string { // <-chan string means receives-only channel of string.
+	c := make(chan string)
+	go func() { // we launch goroutine inside a function.
+		for i := 0; ; i++ {
+			c <- fmt.Sprintf("%s %d", msg, i)
+			time.Sleep(time.Duration(rand.Intn(1500)) * time.Millisecond)
+		}
+
+	}()
+	return c // return a channel to caller.
+}
+
+func main() {
+	c := boring("Joe")
+
+	// timeout for the whole conversation
+	timeout := time.After(5 * time.Second)
+	for {
+		select {
+		case s := <-c:
+			fmt.Println(s)
+		case <-timeout:
+			fmt.Println("You talk too much.")
+			return
+		}
+	}
+}
+```
+
+#Quit channel or Done channel
+```
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+// the boring function return a channel to communicate with it.
+func boring(msg string, quit chan string) <-chan string { // <-chan string means receives-only channel of string.
+	c := make(chan string)
+	go func() { // we launch goroutine inside a function.
+		for i := 0; ; i++ {
+			select {
+			case c <- fmt.Sprintf("%s %d", msg, i):
+				// do nothing
+			case <-quit:
+				fmt.Println("clean up")
+				quit <- "See you!"
+				return
+			}
+			time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
+		}
+
+	}()
+	return c // return a channel to caller
+}
+
+func main() {
+	quit := make(chan string)
+	c := boring("Joe", quit)
+	for i := 3; i >= 0; i-- {
+		fmt.Println(<-c)
+	}
+	quit <- "Bye"
+	fmt.Println("Joe say:", <-quit)
+}
+```
+
+# Fan-in with restire seequence by using Wait Channel
+We can control the order of sending by using Wait channel.
+Send a channel on a channel, making goroutine wait its turn.
+Receive all messages, then enable them again by sending on a private channel.
+```
+type Message struct {
+	str  string
+	wait chan bool
+}
+
+func fanIn(inputs ...<-chan Message) <-chan Message {
+	c := make(chan Message)
+	for i := range inputs {
+		input := inputs[i]
+		go func() {
+			for {
+				c <- <-input
+			}
+		}()
+	}
+	return c
+}
+
+// the boring function return a channel to communicate with it.
+func boring(msg string) <-chan Message { // <-chan Message means receives-only channel of Message.
+	c := make(chan Message)
+	waitForIt := make(chan bool) // share between all messages
+	go func() {                  // we launch goroutine inside a function.
+		for i := 0; ; i++ {
+			c <- Message{
+				str:  fmt.Sprintf("%s %d", msg, i),
+				wait: waitForIt,
+			}
+			time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
+
+			// every time the goroutine send message.
+			// This code waits until the value to be received.
+			<-waitForIt
+		}
+
+	}()
+	return c // return a channel to caller.
+}
+
+func main() {
+	// merge 2 channels into 1 channel
+	c := fanIn(boring("Joe"), boring("Ahn"))
+
+	for i := 0; i < 5; i++ {
+		msg1 := <-c // wait to receive message
+		fmt.Println(msg1.str)
+		msg2 := <-c
+		fmt.Println(msg2.str)
+
+		// each go routine have to wait
+		msg1.wait <- true // main goroutine allows the boring goroutine to send next value to message channel.
+		msg2.wait <- true
+	}
+	fmt.Println("You're both boring. I'm leaving")
+}
+
+```
+
 # Pipeline Pattern
 - Go's concurrency primitives makes it easy to construct streaming pipelines. That enables us to make an efficient use of the I/O and the multiple CPU cores available on the machine, to run our computation faster. - Pipelines are often used to process streams or batches of data.
 - Pipeline is a series of stages that are connected by the channels, where each stage is represented by

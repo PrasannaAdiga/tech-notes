@@ -5,6 +5,7 @@ Struct types are a way of creating complex types that group fields of data toget
 - We can use the struct literal form to initialize a value from a struct type.
 - The dot (.) operator allows us to access individual field values.
 - We can create anonymous structs.
+- Structs are copied by value hence it can be comparable with other struct.
 
 ```
 package main

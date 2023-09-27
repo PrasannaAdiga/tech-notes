@@ -2,6 +2,13 @@
 
 The job of operating system is to give fair chance for all processes access to CPU, memory and other resources. 
 
+Concurrency is not Parallelism. Concurrency means that our program can do more than one thing at a time. It does not necessarily decide to do more than one thing, but it can, it has multiple tasks that it can select from. Parallelism is the act of executing more than one task at the same time. So without Concurrency we cant have Parallelism. In Go we can write concurrent program, but we cant force the program to run in parallel. So if we have lets say 3 tasks, concurrent program will run task1 for some time and then task2 and then may be back to task1 and then task3 and so on. Where as Parallel program will run all of these 3 tasks at the same time. 
+
+Concurrency is about dealing with lots of things at once. Parallelism is about doing lots of things at once.
+
+### Communicating Sequential Processes (CSP)
+In Go, one worker or Goroutine do its work and send the copy of the result to a channel, whereas another Goroutine reads the value from this channel, do its work and send a copy of the new result to another channel and so on. The idea of breaking a program up like this is called Communicating Sequential Processes. The idea here is that our processes, workers in this case, are communicating via these channels sequentially. Each one acts independently but they communicate with each other with the result of their work, and then they potentially take inputs in from other workers as well. So the worker can worj independently. 
+
 ## Process
 - A process is an instance of a running program.
 - A process, gives an environment for the program to execute.
@@ -80,6 +87,114 @@ the value of i to one. But before thread 1 can write the value of i to memory, i
 - As you see, the value of i, can be 2 or it can be 1, depending on how the threads are executing.
 So concurrent access to memory, leads to un-deterministic outcomes.
 
+### Data Race
+Example
+
+```
+i := 0
+ 
+go func() {
+    i++       
+}()
+ 
+go func() {
+    i++
+}()
+```
+Both the goroutines accessing a global variable and does a write operation on it.
+Since `i++` is a 3 level opeartions read, update and assign, and because of context switches the value i can be corrupted.  A data race occurs when multiple goroutines simultaneously access the same memory location and at least one of them is writing. A data race means unexpected behavior.
+
+A data-race-free application doesn’t necessarily mean deterministic results. An application can be free of data races but still have behavior that depends on uncontrolled events (such as goroutine execution, how fast a message is published to a channel, or how long a call to a database lasts). this is a race condition.
+
+We can avoid data races by following three ways:
+- Using atomic operations
+- Protecting a critical section with a mutex
+- Using communication and channels to ensure that a variable is updated by only one goroutine
+
+### Race Condition
+Example
+```
+i := 0
+mutex := sync.Mutex{}
+ 
+go func() {
+    mutex.Lock()
+    defer mutex.Unlock()
+    i = 1                 
+}()
+ 
+go func() {
+    mutex.Lock()
+    defer mutex.Unlock()
+    i = 2                 
+}()
+```
+
+Here depending on the order of goroutine executions, the value i can be either 1 or 2. So this is not a data race but race condition issue. A race condition occurs when the behavior depends on the sequence or the timing of events that can’t be controlled. Here, the timing of events is the goroutines’ execution order.  If we want to ensure that we first go from state 0 to state 1, and then from state 1 to state 2, we should find a way to guarantee that the goroutines are executed in order. Channels can be a way to solve this problem.
+
+### The Go memory model
+The Go memory model is a specification that defines the conditions under which a read from a variable in one goroutine can be guaranteed to happen after a write to the same variable in a different goroutine. 
+Below are the few cases where there will be or will not be data races:
+- Creating a goroutine happens before the goroutine’s execution begins. Therefore, reading a variable and then spinning up a new goroutine that writes to this variable doesn’t lead to a data race:
+```
+i := 0
+go func() {
+    i++
+}()
+```
+- The exit of a goroutine isn’t guaranteed to happen before any event. Thus, the following example has a data race:
+```
+i := 0
+go func() {
+    i++
+}()
+fmt.Println(i)
+```
+- A send on a channel happens before the corresponding receive from that channel completes. Thus the following example does not have a data race:
+```
+i := 0
+ch := make(chan struct{})
+go func() {
+    <-ch
+    fmt.Println(i)
+}()
+i++
+ch <- struct{}{}
+```
+- Closing a channel happens before a receive of this closure. Therefore, this example is also free from data races.
+```
+i := 0
+ch := make(chan struct{})
+go func() {
+    <-ch
+    fmt.Println(i)
+}()
+i++
+close(ch)
+```
+- A receive from an unbuffered channel happens before the send on that channel completes. Thus this will not have data races
+```
+i := 0
+ch := make(chan struct{})  
+go func() {
+    i = 1
+    <-ch
+}()
+ch <- struct{}{}
+fmt.Println(i)
+```
+- A send on buffered channel happens before the receive on that channel completes. Thus this will have data race
+```
+i := 0
+ch := make(chan struct{}, 1)
+go func() {
+    i = 1
+    <-ch
+}()
+ch <- struct{}{}
+fmt.Println(i)
+```
+
 ### Memory Access Synchronization or Race Conditions
 - So one way to handle the above concurency issue will be to use memory access synchronization tools.
 - We need to guard the access to the shared memory so that a thread has exclusive access at a time. and we need to force thread 1 and thread 2 to run sequentially, to increment the value of i.
@@ -125,6 +240,14 @@ faster.
 ## Goroutines
 https://github.com/ardanlabs/gotraining/tree/master/topics/go/concurrency/goroutines
 
+A Goroutine is a function executing concurrenlty with other goroutines in the same address space(OS thread). It is lightweight, costing little more that the allocation of stack space. 
+
+When we write a Go program, that program is going to interact with the Go runtime. And the specific part of the Go runtime which is called Go Scheduler. And this Go Scheduler will internally interact with the OS. Go routine sits between a Go program and Go scheduler. And between the Scheduler and OS the interactions happens through Threads. Threads are the tools used by OS to manage their Concurrency. Go Scheduler will map goroutines onto OS threads. 
+
+**Goroutine States and Goroutine vs Threads**
+
+![stack_heap](images/goroutine_vs_thread.drawio.png "icon")
+
 - Goroutines are user space threads, managed by Go runtime, Go runtime is part of the executable, it is built into the executable of the application.
 - Goroutines are extremely lightweight, goroutines starts with 2KB of stack, which can grow and shrink
 as required.
@@ -149,6 +272,11 @@ Goroutines are functions that are created and scheduled to be run independently 
     - Concurrency is about dealing with lots of things at once.
     - Parallelism is about doing lots of things at once.
 - Parallelism is about physically doing two or more things at the same time. Concurrency is about undefined, out of order, execution.
+
+## Fork-Join Model
+Goroutines follows Fork-Join model
+
+![stack_heap](images/fork_join_model.drawio.png "icon")
 
 ## Different ways to start a Go-routine
 ```
