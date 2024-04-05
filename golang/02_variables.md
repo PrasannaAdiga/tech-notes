@@ -8,11 +8,12 @@ https://github.com/ardanlabs/gotraining/tree/master/topics/go/language/variables
 - Variables names should start with a letter or an underscore. Unicode letters are also ok.
 
 ## Declaration and Initialization
-- var a string - **zero value** decalaration
+- var a string - **zero value** or **null value**decalaration
 - a := "golang" - **Short variable** declaration operation, to declare and initialize at the same time
 
 ## Types
-- Type is everything in Go. Without this we can not have Integrity.
+- Type is everything in Go. Without this we can not have Integrity. Types refers to the types of values, because every value in Go is of specific type.
+- Go is a statically typed language not a dynamically typed language.
 - Type provides 2 pieces of information. Size of the memory that is being allocated and what that memory represents.
 - Go has built-in types like numeric, string and bool.
 - **Numeric**: int can be 8, 16 or 64 bits depending on the underlying architecture
@@ -24,6 +25,14 @@ Go has 3 different Types
 - Built-in types like numeric, float, bool, string, array and Error
 - User defined type like Struct
 - Reference types like slices, maps, interfaces, functions and channels. We consider all reference type as nil when we set it to zero value.
+
+## Null value
+All Go value types come with a so-called "null value" which is the value stored in a variable if no other value is explicitly set.
+Here's a list of the null values for the different types:
+- int => 0
+- float64 => 0.0
+- string => "" (i.e., an empty string)
+- bool => false
 
 ## String 
 - String is 2 word data structure with 1 byte of size where each word has 4 bit size. Here the first word is a pointer to the backing array and the second word is the total number of bytes.
@@ -42,12 +51,17 @@ Go has 3 different Types
 ## Boolean
 - true or false value
 
-## Errors
+## Errors 
 ```
 type error interface {
     Error() string
 }
 ```
+
+## Explicit type assignment
+We can explicitely assign a type to variable. Else, go will implicitely assigns a type.
+- var count = 10 (here go will implicitely assign an `int` type to the variable `count`)
+- var count float64 = 10 (here we explicitely assign `float` type to the variable `count`. By default Go will store the value as `10.0`)
 
 ## Type Conversion
 Go does not have type casting, it has a type conversion instead. 

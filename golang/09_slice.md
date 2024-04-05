@@ -380,6 +380,52 @@ In the pointer semantics the code `friends = friends[:2]` will mutate the orizin
 
 ### Slice Examples:
 
+```
+package main
+
+import "fmt"
+
+func main() {
+	prices := [4]float64{10.99, 20.99, 30.99, 40.99}
+	fmt.Println(prices)
+
+	featuredPrices := prices[1:] // This is a slice from array pricess, which have the elements from index 1 to end
+	fmt.Println("Length and capacity of first slice ", len(featuredPrices), cap(featuredPrices))
+
+	highlightedPrice := featuredPrices[:1]
+	fmt.Println(highlightedPrice)
+	fmt.Println("Length and capacity of second slice ", len(highlightedPrice), cap(highlightedPrice))
+	fmt.Println(len(highlightedPrice), cap(highlightedPrice))
+
+	highlightedPrice = highlightedPrice[:3] // We can always select more towrds end of slice, till its capacity
+	fmt.Println(highlightedPrice)
+	fmt.Println("Length and capacity of second slice after reassign ", len(highlightedPrice), cap(highlightedPrice))
+	fmt.Println(len(highlightedPrice), cap(highlightedPrice))
+
+    ============================================
+	a := []int{1,2,3}
+	b := []int{10,11,12}
+
+	a = append(a,4,5,6)
+	b := append{b,13,14,15}
+
+	c := append(a, b...)
+	fmt.Println(c)
+	O/P: [1,2,3,4,5,6,10,11,12,13,14,15]
+}
+
+O/P:
+Length and capacity of first slice  3 3
+[20.99]
+Length and capacity of second slice  1 3
+1 3
+[20.99 30.99 40.99]
+Length and capacity of second slice after reassign  3 3
+3 3
+
+   
+```
+
 - Declare and Length: https://go.dev/play/p/ydOJ1GHgR_Y
 - Reference Types: https://go.dev/play/p/WqDnss06_9E
 - Appending slices: https://go.dev/play/p/E-NTGM6daAA

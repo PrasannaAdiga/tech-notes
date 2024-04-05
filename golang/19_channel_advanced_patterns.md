@@ -602,3 +602,7 @@ Here in the select statememnt the main go routine is trying to receive the data 
 If we use the unbuffered channel here instead of buffered, then this will have a goroutine leak where the child goroutine will continue to get blocked for the corresponding receive operation. 
 
 ![stack_heap](images/channels_advanced_patterns.drawio.png "icon")
+
+
+### Refer:
+- https://github.com/lotusirous/go-concurrency-patterns

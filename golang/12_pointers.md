@@ -1,13 +1,17 @@
 # Pointers
 https://github.com/ardanlabs/gotraining/tree/master/topics/go/language/pointers
 
+Pointers are variables that store value addresses instead of values.
+
 Pointers provide a way to share data across program boundaries. Having the ability to share and reference data with a pointer provides the benefit of efficiency. There is only one copy of the data and everyone can see it changing. The cost is that anyone can change the data which can cause side effects in running programs.
 
 - Use pointers to share data.
 - Values in Go are always pass by value.
 - "Value of", what's in the box. "Address of" ( & ), where is the box.
 - The (*) operator declares a pointer variable and the "Value that the pointer points to".
-- Ponters are primarily used to share memory. Use copies whenver possible.
+- Ponters are primarily used to share memory. Use copies whenver possible. So it helps in avoiding unnecessary value copies and mutate any values directly. 
+- We can pass copy of a value to a function, or address of a value to a function.
+- Null value or zero value for a pointer is `nil`. `nil` represents the absence of an address value - i.e., a pointer pointing at no address / no value in memory
 
 Example
 ```

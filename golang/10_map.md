@@ -86,6 +86,27 @@ Jackson {Michael Jackson}
 Goodbye.
 ```
 
+## Type Alias
+We can have type alias for any bigger types
+
+```
+type floatMap map[string]float64
+
+func (f floatMap) output() {
+	fmt.Println(f)
+}
+
+func main() {
+	courseRating := make(floatMap, 3)
+
+	courseRating["go"] = 4.7
+	courseRating["react"] = 4.8
+	courseRating["angular"] = 4.7
+
+	courseRating.output()
+}
+```
+
 ### Map examples:
 
 - Absent keys: https://go.dev/play/p/5KHMfmL2SyA

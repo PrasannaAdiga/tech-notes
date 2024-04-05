@@ -51,7 +51,96 @@ Pi 3.141592
 
 In the above code we have created a variable `e` with zero value and constructed a variable `e2` with some value by using **struct literal construction**.
 
+We can also create struct for an inbuilt types like string, int, bool etc and add our own custom methods to it
+
+```
+type str string
+
+func (s str) log() {
+	fmt.Println(s)
+}
+
+func main() {
+	var name str
+	name = "Prasanna"
+	name.log()
+}
+
+```
+
+## Empty struct
+
 We can also have an empty literal construction 'example{}' to create zero value struct which mainly used when we do not have the need to assign it to a variable, returning from a function or while passing it as a parameter to a function.
+
+```
+// example represents a type with different fields.
+type example struct {
+	flag    bool
+	counter int16
+	pi      float32
+}
+
+func main() {
+	// Declare a variable of type example set to its
+	// zero value.
+	var e1 example
+
+	e1 := example{}
+
+	// Display the field values.
+	fmt.Println("Flag", e1.flag)
+	fmt.Println("Counter", e1.counter)
+	fmt.Println("Pi", e1.pi)
+
+	O/P:
+	False
+	0
+	0.0
+}
+```
+
+## Constructor function
+
+We can use constructor function to create a value of struct. So that we can call this constructor function as many times as we want and from anywhere in the program. Also, it is better to return pointer of the created value from this construction function.
+
+We can also do validations in constructor functions before creating any value.
+
+We usually name constructor function as just `New` since we usually create a struct in its own package and import it in other places. So we can call constructor function like for example `user.New()`
+
+```
+type user struct {
+	firstName string
+	lastName  string
+	birthDate string
+	createdAt time.Time
+}
+
+func newUser(firstName string, lastName string, birthDate string) *user {
+	return &user{
+		firstName: firstName,
+		lastName:  lastName,
+		birthDate: birthDate,
+		createdAt: time.Now(),
+	}
+}
+
+func main() {
+	userFirstName := getUserData("Please enter your first name: ")
+	userLastName := getUserData("Please enter your last name: ")
+	userBirthDate := getUserData("Please enter your birthdate (MM/DD/YYYY): ")
+
+	appUser := newUser(userFirstName, userLastName, userBirthDate)
+
+	fmt.Println(appUser.firstName)
+}
+
+func getUserData(data string) string {
+	var userData string
+	fmt.Print(data)
+	fmt.Scan(&userData)
+	return userData
+}
+```
 
 ## Anonymous Struct
 ```
@@ -147,6 +236,41 @@ O/P
 No compilation error    
 ```
 
+## Struct Embedding
+
+Build a new struct that builds upon an existing structs. Go/Structs does not have classes or inheritances. So we use Embedding to have all the fields and methods of an existing struct along with its own fields or methods.
+
+```
+type User struct {
+	firstName string
+	lastName  string
+	birthDate string
+	createdAt time.Time
+}
+
+type Admin struct {
+	email    string
+	password string
+	User
+}
+
+func NewAdmin(email string, password string) *Admin {
+	return &Admin{
+		email:    email,
+		password: password,
+		User: User{
+			firstName: "ADMIN",
+			lastName:  "ADMIN",
+			birthDate: "---",
+			createdAt: time.Now(),
+		},
+	}
+}
+
+adminUser := user.NewAdmin("test@example.com", "admin")
+
+```
+
 ## Memory allignment and Padding in Struct
 
 **Qustion**: How much memory the above code takes?
@@ -180,8 +304,110 @@ type example struct {
 
 But until and unless our profilling tool report about this memory issues, it is better to group all the fields in a Struct in a way which are related and better for the readability. 
 
+## Struct complete example
+```
+main function in main package
+
+package main
+
+import (
+	"fmt"
+
+	"example.com/structs/user"
+)
+
+func main() {
+	userFirstName := getUserData("Please enter your first name: ")
+	userLastName := getUserData("Please enter your last name: ")
+	userBirthDate := getUserData("Please enter your birthdate (MM/DD/YYYY): ")
+
+	appUser, err := user.New(userFirstName, userLastName, userBirthDate)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	adminUser := user.NewAdmin("test@example.com", "admin")
+
+	appUser.OutputUserDetails()
+	appUser.ClearUserName()
+	appUser.OutputUserDetails()
+
+	adminUser.OutputUserDetails()
+}
+
+func getUserData(data string) string {
+	var userData string
+	fmt.Print(data)
+	fmt.Scanln(&userData)
+	return userData
+}
+
+=======
+
+user function in user package
+
+package user
+
+import (
+	"errors"
+	"fmt"
+	"time"
+)
+
+type User struct {
+	firstName string
+	lastName  string
+	birthDate string
+	createdAt time.Time
+}
+
+type Admin struct {
+	email    string
+	password string
+	User
+}
+
+func New(firstName string, lastName string, birthDate string) (*User, error) {
+	if firstName == "" || lastName == "" || birthDate == "" {
+		return nil, errors.New("first name, last name and birth date are required")
+	}
+	return &User{
+		firstName: firstName,
+		lastName:  lastName,
+		birthDate: birthDate,
+		createdAt: time.Now(),
+	}, nil
+}
+
+func NewAdmin(email string, password string) *Admin {
+	return &Admin{
+		email:    email,
+		password: password,
+		User: User{
+			firstName: "ADMIN",
+			lastName:  "ADMIN",
+			birthDate: "---",
+			createdAt: time.Now(),
+		},
+	}
+}
+
+func (u *User) OutputUserDetails() {
+	fmt.Println(u.firstName, u.lastName, u.birthDate, u.createdAt)
+}
+
+func (u *User) ClearUserName() {
+	u.firstName = ""
+	u.lastName = ""
+}
+
+
+```
+
 ### Struct examples
 
 - Declare, create and initialize struct types: https://go.dev/play/p/djzGT1JtSwy
 - Anonymous struct types: https://go.dev/play/p/09cxjnmfcdC
 - Named vs Unnamed types: https://go.dev/play/p/ky91roJDjir
+

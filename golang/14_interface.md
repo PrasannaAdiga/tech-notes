@@ -329,6 +329,196 @@ func clone[V any](s []V) []V {
 
 ## Interface examples:
 
+**main package**
+```
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strings"
+
+	"example.com/note/note"
+	"example.com/note/todo"
+)
+
+type saver interface {
+	Save() error
+}
+
+// type displayer interface {
+// 	Display()
+// }
+
+// type outputtable interface {
+// 	Display()
+// 	Save() error
+// }
+
+type outputtable interface {
+	saver // Enbedded interfaces
+	Display()
+}
+
+func main() {
+	title, content := getNoteData()
+	todoText := getUserInput("Todo text:")
+
+	userNote, err := note.New(title, content)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	todo, err := todo.New(todoText)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = OutputData(userNote)
+	if err != nil {
+		return
+	}
+	OutputData(todo)
+}
+
+func OutputData(data outputtable) error {
+	data.Display()
+	return saveData(data)
+}
+
+func saveData(data saver) error {
+	err := data.Save()
+
+	if err != nil {
+		fmt.Println("Saving the todo failed.")
+		return err
+	}
+
+	fmt.Println("Saving the todo succeeded!")
+	return nil
+}
+
+func getNoteData() (string, string) {
+	title := getUserInput("Note title:")
+	content := getUserInput("Note content:")
+
+	return title, content
+}
+
+func getUserInput(prompt string) string {
+	fmt.Printf("%v ", prompt)
+
+	reader := bufio.NewReader(os.Stdin)
+
+	text, err := reader.ReadString('\n')
+
+	if err != nil {
+		return ""
+	}
+
+	text = strings.TrimSuffix(text, "\n")
+	text = strings.TrimSuffix(text, "\r")
+
+	return text
+}
+
+```
+
+**note package**
+```
+package note
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"strings"
+	"time"
+)
+
+type Note struct {
+	Title     string    `json:"title"`
+	Content   string    `json:"content"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+func (note Note) Display() {
+	fmt.Printf("Your note titled %v has the following content:\n\n%v\n\n", note.Title, note.Content)
+}
+
+func (note Note) Save() error {
+	fileName := strings.ReplaceAll(note.Title, " ", "_")
+	fileName = strings.ToLower(fileName) + ".json"
+
+	json, err := json.Marshal(note)
+
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(fileName, json, 0644)
+}
+
+func New(title, content string) (Note, error) {
+	if title == "" || content == "" {
+		return Note{}, errors.New("Invalid input.")
+	}
+
+	return Note{
+		Title:     title,
+		Content:   content,
+		CreatedAt: time.Now(),
+	}, nil
+}
+
+```
+
+**todo package**
+```
+package todo
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+)
+
+type Todo struct {
+	Text string `json:"text"`
+}
+
+func (todo Todo) Display() {
+	fmt.Println(todo.Text)
+}
+
+func (todo Todo) Save() error {
+	fileName := "todo.json"
+	json, err := json.Marshal(todo)
+
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(fileName, json, 0644)
+}
+
+func New(text string) (Todo, error) {
+	if text == "" {
+		return Todo{}, errors.New("invalid input")
+	}
+
+	return Todo{
+		Text: text,
+	}, nil
+}
+
+```
+
 - Repetitive Code That Needs Polymorphism: https://go.dev/play/p/Txsuzcpdran
 - Polymorphism: https://go.dev/play/p/J7OWzPzV40w
 - Method Sets: https://go.dev/play/p/N50ocjUekf3
@@ -337,3 +527,30 @@ func clone[V any](s []V) []V {
 - Type Assertions: https://go.dev/play/p/f47JMTj2eId
 - Conditional Type Assertions: https://go.dev/play/p/9fYc5RyyvVG
 - The Empty Interface and Type Switches: https://go.dev/play/p/iyDfKCIQ4S9
+
+## Any value and type switch in Go
+In the above example we can have below function to accept any data and work differently depending on the type of the input data.
+A function can also return any type value.
+
+```
+printSomething(1)
+printSomething(1.0)
+printSomething("1")
+
+func printSomething(data any) {
+	switch data.(type) {
+	case int:
+		fmt.Println("Integer: ", data)
+	case float64:
+		fmt.Println("Float: ", data)
+	case string:
+		fmt.Println("String: ", data)
+	}
+}
+
+Also we can use below approach
+
+if intValue, ok := data.(int); ok {
+	fmt.Println("integer: ", intValue)
+}
+```

@@ -29,3 +29,22 @@ Perforamce in a software can come from 4 places
 Go can take the advantages of the hardware and it solves the first 3 perforamce issues. This gives us lot of performance built-in Go. 
 
 Readability, writing clear and simple less code, testing, code reviews, re-factoring and good algorithms are the main blocks in Go to increase the performance from developers side.
+
+## Best features of Go Programming language
+- Compiled: Apps created in Go actually compile to native machine code and dont need any interpreter or virtual machine.
+- Garbage collected
+- Designed for multi core processor
+- Easy to read codes
+- Spend less time and money to develop an app
+- Use Go for a range of apps: We can use Go for system and network programming, big data, machine learning, audio and video editing etc
+- Worry less about the app crashing
+
+## Install Go in Mac
+- https://www.educative.io/answers/how-to-check-the-golang-version-on-mac
+- Set below env variables:
+    - export GOROOT=/usr/local/go 
+    - export GOPATH=$HOME/go
+    - export PATH=$GOPATH/bin:$GOROOT/bin:$PATH 
+
+
+
