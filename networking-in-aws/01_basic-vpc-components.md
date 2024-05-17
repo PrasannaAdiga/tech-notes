@@ -22,11 +22,46 @@ VPC is virtual private cloud. And it means that you get your own private network
 ### Classless Inter Domain Routing
 - There are 2 types of IP addresses IPv4 and IPv6. IPv4 addresses are going to exaust soon, so that we have to use IPv6 addresses in future. IPv4 are 32 bit length where as IPv6 128 bit of length.
 - IP address is the identity of the each host in the network. 
+- Example 192.168.254.0/24
+- The first 24 bits (3 bytes) are network the rest 8 are for host 
+- This means we can have 2^24 (16777216) networks and each network has 2^8 (255) hosts
+- 192.168.254.0/24 is also called a subnet
+- The subnet has a mask 255.255.255.0
+- The subnet mask determines the network and host part. For example this 192.168.254.0/24 has first 24 bits as network address range and last 8 bits are host address range
+- Subnet mask is used to determine whether an IP is in the same subnet
+- Most networks consists of **hosts** and a **Default Gateway**
+- Host A can talk to B directly if both are in the same subnet
+- Otherwise A sends it to someone who might know, the gateway
+- The Gateway has an IP Address and each host should know its gateway
+- Each host in a network will have 3 things, its ip address, its subnet mask and default gateway address
 
 ![stack_heap](images/cidr.drawio.png "icon")
 Here Network Addess is the VPC address and host adresses are the addresses which we can provide to different host or EC2.
 
 We can not assign the first 4 and the last one IP address to any of the host because they are reserved.
+
+- Lets say Host 192.168.1.3 wants to talk to 192.168.1.2 and its subnet mask is 255.255.255.0(192.168.1.0/24 & 192.168.1.2/24)
+- 192.168.1.3 applies subnet mask to itself and the destination IP 192.168.1.2
+    - 255.255.255.0 & 192.168.1.3 = 192.168.1.0
+    - 255.255.255.0 & 192.168.1.2 = 192.168.1.0
+- This will end up in same subnet! so no need to route the traffic to other network
+
+- Lets say Host 192.168.1.3 wants to talk to 192.168.2.2 and its subnet mask is 255.255.255.0(192.168.1.0/24 & 192.168.2.0/24)
+- 192.168.1.3 applies subnet mask to itself and the destination IP 192.168.2.2
+    - 255.255.255.0 & 192.168.1.3 = 192.168.1.0
+    - 255.255.255.0 & 192.168.2.2 = 192.168.2.0
+- Not the subnet! So the packet is sent to the Default Gateway 192.168.1.100 and which then route the traffic to network to right destination network and host
+
+## Subnets
+
+- If a subnet route table has an route to go to Internet via AGW, it is called a public subnet.
+And if a subnet route table does not have a route to go to Internet through AGW, then it is called
+a private subnet.
+- If we attach a custom route table to a subnet, then its stop following main route table. Its best practice to use a separate custom route table for each of the subnets.
+- We can attach the custom route table to as many as subnets, so that all of them will follow the same rule.
+- AWS reserves 5 IPs(first 4 and last 1 IP addess) in each subnet, so that we can not use them.
+
+![stack_heap](images/subnet.drawio.png "icon")
 
 ## Route Tables and Internet Gateway
 
@@ -39,16 +74,6 @@ We can not assign the first 4 and the last one IP address to any of the host bec
 
 ![stack_heap](images/route-table.drawio.png "icon")
 
-## Subnets
-
-- If a subnet route table has an route to go to Internet via AGW, it is called a public subnet.
-And if a subnet route table does not have a route to go to Internet through AGW, then it is called
-a private subnet.
-- If we attach a custom route table to a subnet, then its stop following main route table. Its best practice to use a separate custom route table for each of the subnets.
-- We can attach the custom route table to as many as subnets, so that all of them will follow the same rule.
-- AWS reserves 5 IPs(first 4 and last 1 IP addess) in each subnet, so that we can not use them.
-
-![stack_heap](images/subnet.drawio.png "icon")
 
 ## Private, Public and Elastic IP(EIP)
 

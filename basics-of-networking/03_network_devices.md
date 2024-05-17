@@ -86,7 +86,6 @@
 - Automatically Assigns IP Addresses to Hosts
 - Makes Administering a Network Much Easier
 - An Alternative is Static IP addressing
-- We'll Talk More About DHCP Later in the Course    
 
 ### Voice over IP (VoIP) Endpoints
 - Most phone systems run over IP networks via dedicated protocols, such as the Session Initiation Protocol (SIP), both in-home and office environments.

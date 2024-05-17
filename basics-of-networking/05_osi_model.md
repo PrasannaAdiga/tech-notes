@@ -1,4 +1,4 @@
-# OSI Model
+# Open Systems Interconnection (OSI) Model
 
 ## Layer 7 - Application Layer
 - Where users interact with the computer.
@@ -10,7 +10,7 @@
 
 ## Layer 6 – Presentation Laye
 - Ensures that data transferred from one system’s Application Layer can be read by the Application Layer on another one.
-- Provides character code conversion, data compression, and data encryption/decryption.
+- Provides character code conversion, data compression, seriallization/de-seriallization and data encryption/decryption.
 - Example: Google Chrome HTML converted to ASCII Format.    
 - Example Layer 6 File Formats:
     - Web Browser: HTML, XML, JavaScript o Graphics Files: JPEG, GIF, PNG
@@ -19,7 +19,7 @@
     - Text/Data: ASCII, EBCDIC
 
 ## Layer 5 - Session Layer
-- Responsible for setting up, managing, and then tearing down sessions between network devices.
+- Responsible for setting up, managing, and then tearing down sessions/connections between network devices.
 - Ensures data from different application sessions are kept separate.
 - Utilizes Application Program Interfaces (APIs) to communicate with TCP/IP protocols.
 - Coordinates communication between systems.
@@ -94,3 +94,25 @@ Defines the physical and electrical medium for network communication:
 It’s responsible for the network hardware and physical topology.
 
 ![stack_heap](images/osi_encap_decap.drawio.png "icon")
+
+## Host to host communication
+- A sends a message to B specifying the MAC address 
+- Everyone in the network will “get” the message but only B will accept it
+- Imagine millions of machines?
+- We need a way to eliminate the need to send it to everyone 
+- The address needs to get better
+- We need routability, meet the IP Address
+- The IP Address is built in two parts
+- One part to identify the network, the other is the host
+- We use the network portion to eliminate many networks
+- The host part is used to find the host
+- Still needs MAC addresses!
+- It's not enough just to address the host
+- The host is runnings many apps each with different requirements Meet ports
+- You can send an HTTP request on port 80, a DNS request on port 53 and an SSH request on port 22 all running on the same server!
+- Host needs addresses
+- MAC Addresses are great but not scalable in the Internet
+- Internet Protocol Address solves this by routing 
+- Layer 4 ports help create finer addressability to the process level
+
+![stack_heap](images/host_to_host_comm.drawio.png "icon")
