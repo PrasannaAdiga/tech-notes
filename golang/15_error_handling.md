@@ -136,6 +136,38 @@ Use the error string type and variables first untill we no longer get enough con
 
 ## Custom Error Types
 
+```
+package main
+
+import (
+	"fmt"
+	"os"
+)
+
+type MyError struct{}
+
+func (m *MyError) Error() string {
+	return "boom"
+}
+
+func sayHello() (string, error) {
+	return "", &MyError{}
+}
+
+func main() {
+	s, err := sayHello()
+	if err != nil {
+		fmt.Println("unexpected error: err:", err)
+		os.Exit(1)
+	}
+	fmt.Println("The string:", s)
+}
+
+O/P:
+unexpected error: err: boom
+exit status 1
+```
+
 ### Type as Context
 Think about networking issue, there are so many problems can happen on the network. So an error variable is not gonna be enough to say there was a network issue. We need to have more details about that network issue. 
 ```

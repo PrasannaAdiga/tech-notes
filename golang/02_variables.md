@@ -22,7 +22,7 @@ https://github.com/ardanlabs/gotraining/tree/master/topics/go/language/variables
     - numeric/integer: int can be 8, 16 or 64 bits depending on the underlying architecture
     - float: Float32 or Float64
     - booleans
-    - strings
+    - strings and runes
     - constants
     - arrayas
     - Error
@@ -64,6 +64,23 @@ Here's a list of the null values for the different types:
 - Two ways to define a string.
     - interpreted string: ex: "this is a escape character: \n it creates a new line"
     - raw string: ex: `this is a escape character: \n it does not create a new line`
+
+## Rune
+- A rune is an alias for int32 and it represents a Unicode code point, a Unicode value.
+- So it is not a character, it is an integer value.
+- A rune is an integer value, and that value represents a Unicode code point and that will be converted into a character.
+- Runes are used to represent individual characters in a string, and they facilitate working with Unicode characters efficiently.
+- Runes are declared using single quotes, double quotes and backticks are for strings.
+
+```
+var ch rune = 'a'
+fmt.Println(ch)
+O/P:
+97
+
+To convert rune to string:
+str := string(ch)
+```
 
 ## Numeric
 - Integrers(int32 or int64). Ex: 99, 0, -93
@@ -109,3 +126,24 @@ Below are the multiple ways to decaring a variables:
 - myName := "Mike" // Short declaration syntax
 
 - Declare and initialize variables: https://go.dev/play/p/xD_6ghgB7wm
+
+### String functions
+- To convert int to string: `strconv.Itoa(10)`
+- To convert string to slice
+```
+fruits := "apples, orange, banana"
+parts := strings.split(fruits, ",") O/P: [apples orange banana]
+```
+- To Join string values
+```
+countries :=  []string{"Genrmany", "France", "India"}
+joined := strings.join(countries, ",") O/P: Genrmany, France, India
+```
+- To find a text: `strings.Contains(str, "Go")`
+- To replace a text: `strings.Replace(str, "Go", "Hello", 1)`
+- To lowercase or uppercase: `strings.ToLower(str)` - `strings.ToUpper(str)`
+- To repeat the same string: `strings.Repeat("foo ", 3)` O/P: foo foo foo
+- To count number of occurance: `strings.Count("Hello", "He")` O/P 1
+- To find has the prefix: `strings.HasPrefix("Hello", "He")` O/P yes
+- To find has the suffix: `strings.HasSuffix("Hello", "lo")` O/P yes
+

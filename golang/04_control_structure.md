@@ -151,6 +151,7 @@ func main() {
 # Reading and Writing to files
 
 In the above example code, instead of saving accountBalance in memory, we can save and read it from file as shown below:
+**os.ReadFile & os.WriteFile**
 
 ```
     const accountBalanceFile = "balance.txt"

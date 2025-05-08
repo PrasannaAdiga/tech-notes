@@ -85,18 +85,17 @@ func main() {
 	// zero value.
 	var e1 example
 
-	e1 := example{}
+	e1 = example{}
 
 	// Display the field values.
 	fmt.Println("Flag", e1.flag)
 	fmt.Println("Counter", e1.counter)
 	fmt.Println("Pi", e1.pi)
-
-	O/P:
-	False
-	0
-	0.0
 }
+O/P:
+False
+0
+0.0
 ```
 
 ## Constructor function
@@ -190,6 +189,7 @@ Pi 3.141592
 
 ## Implicit Conversion
 Go does not provide any implicit conversion from one type to another.
+
 ```
 type A struct {
     flag    bool
@@ -211,7 +211,9 @@ fmt.Println(a, b)
 O/P
 Compilation error
 ```
+
 But if we need such conversion, then we have to do explicit conversion by using conversion syntax
+
 ```
 b = (B)a
 fmt.Println(a, b)

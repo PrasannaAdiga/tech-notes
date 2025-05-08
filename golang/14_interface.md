@@ -252,6 +252,20 @@ func main() {
 	// Change the name field for both printers.
 	c.name = "PROGRAF PRO-1000"
 	e.name = "Home XP-4100"	
+
+	// Iterate over the slice of printers and call
+	// print against the copied interface value.
+	for _, p := range printers {
+		p.print()
+	}
+
+	// When we store a value, the interface value has its own
+	// copy of the value. Changes to the original value will
+	// not be seen.
+
+	// When we store a pointer, the interface value has its own
+	// copy of the address. Changes to the original value will
+	// be seen.
 }
 
 O/P:
@@ -304,6 +318,31 @@ Whenver we assign a concrete type to an interface it looses its identity. For ex
 But there are many times when we want our types to work polymorphically, but only for a specific period of time and after we are done with that polymorphic behaviour, we would like to get back to that concrete type. For this we use generic or Generic Programming.
 
 When we pass any concrete type through the interface, Go is going to convert it to an interface for example File concrete type will be converted to io.Reader. We no longer know what type we started with. With Generic Programming we are going to chage the model a little bit. We are going to start with the concrete type, we are going to have what is called a Generic Function. Within that generic function, we are going to allow our type to act as an io.Reader, but when its done we are going to get that File object back out. So that the Generic function is going to be able to work with Files and TCPConns, but at the end its going to return that concrete type back out. So we are going to know what we start with and know what we end with. 
+
+Generics, also known as parametric polymorphism, enable you to write code that operates on multiple types without explicitly specifying the types upfront. This leads to more concise, reusable, and type-safe code.
+
+Prior to the introduction of generics, you had to use interfaces and type assertions for achieving similar functionality. However, this approach had its drawbacks, such as a lack of type safety and increased boilerplate code.
+
+```
+package main
+
+import "fmt"
+
+func PrintSlice[T any](s []T) {
+    for _, v := range s {
+        fmt.Println(v)
+    }
+}
+
+func main() {
+    intSlice := []int{1, 2, 3}
+    stringSlice := []string{"hello", "world"}
+
+    PrintSlice(intSlice)
+    PrintSlice(stringSlice)
+}
+```
+
 ```
 func main() {
 	testScores := []float64 { // Or here we can use float32 type also
@@ -324,6 +363,33 @@ func clone[V any](s []V) []V {
 		result[i] = v
 	}
 	return result
+}
+```
+
+## Any value and type switch in Go
+In the above example we can have below function to accept any data and work differently depending on the type of the input data.
+A function can also return any type value.
+
+```
+printSomething(1)
+printSomething(1.0)
+printSomething("1")
+
+func printSomething(data any) {
+	switch data.(type) {
+	case int:
+		fmt.Println("Integer: ", data)
+	case float64:
+		fmt.Println("Float: ", data)
+	case string:
+		fmt.Println("String: ", data)
+	}
+}
+
+Also we can use below approach
+
+if intValue, ok := data.(int); ok {
+	fmt.Println("integer: ", intValue)
 }
 ```
 
@@ -527,30 +593,3 @@ func New(text string) (Todo, error) {
 - Type Assertions: https://go.dev/play/p/f47JMTj2eId
 - Conditional Type Assertions: https://go.dev/play/p/9fYc5RyyvVG
 - The Empty Interface and Type Switches: https://go.dev/play/p/iyDfKCIQ4S9
-
-## Any value and type switch in Go
-In the above example we can have below function to accept any data and work differently depending on the type of the input data.
-A function can also return any type value.
-
-```
-printSomething(1)
-printSomething(1.0)
-printSomething("1")
-
-func printSomething(data any) {
-	switch data.(type) {
-	case int:
-		fmt.Println("Integer: ", data)
-	case float64:
-		fmt.Println("Float: ", data)
-	case string:
-		fmt.Println("String: ", data)
-	}
-}
-
-Also we can use below approach
-
-if intValue, ok := data.(int); ok {
-	fmt.Println("integer: ", intValue)
-}
-```

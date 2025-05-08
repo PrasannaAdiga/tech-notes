@@ -261,7 +261,54 @@ Added 1 to i
 3
 ```
 
+All together:
 
+```
+package main
+
+import "fmt"
+
+type transformFunction func(int) int
+
+// func double(num int) int {
+// 	return num * 2
+// }
+
+// func tripple(num int) int {
+// 	return num * 3
+// }
+
+func main() {
+	numbers := []int{1, 2, 3, 4, 5}
+	// doubled := transformNumbers(&numbers, func(num int) int { // Using anonymous function
+	// 	return num * 2
+	// })
+	// trippled := transformNumbers(&numbers, tripple)
+
+	doubled := transformNumbers(&numbers, createTransformer(2))
+	trippled := transformNumbers(&numbers, createTransformer(3))
+
+	fmt.Println(doubled)
+	fmt.Println(trippled)
+}
+
+func transformNumbers(numbers *[]int, transformFun transformFunction) []int {
+	res := []int{}
+
+	for _, num := range *numbers {
+		res = append(res, transformFun((num)))
+	}
+
+	return res
+}
+
+func createTransformer(factor int) transformFunction { // Using Closure
+	return func(num int) int {
+		return num * factor
+	}
+}
+
+```
 ## Variadic function
 
 ```
@@ -292,7 +339,7 @@ func sumup(startingValue int, numbers ...int) int {
 }
 ```
 
-## defer
+## Defer
 - differ is a mechanism that allows you to postpone the execution of a function until the surrounding function returns.
 - It's a useful feature for ensuring that certain cleanup actions or finalizing tasks are performed, regardless of how the function exits, whether it returns normally or panics. So it is a little like async await in NodeJS.
 - We can also have multiple deferred statements in a function, and they will be executed in a last in first out order when the function returns.
@@ -366,3 +413,17 @@ Return from process
  ```
 
 ## Recursion
+Recursion is a fundamental concept in programming, where a function calls itself directly or indirectly in order to solve a problem.
+
+```
+func main() {
+	fmt.Println(factorial(5))
+}
+
+func factorial(num int) int {
+	if n == 0 {
+		return 1
+	}
+	return num * factorial(num - 1)
+}
+```
