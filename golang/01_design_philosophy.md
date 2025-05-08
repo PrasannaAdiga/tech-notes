@@ -32,12 +32,15 @@ Readability, writing clear and simple less code, testing, code reviews, re-facto
 
 ## Best features of Go Programming language
 - Compiled: Apps created in Go actually compile to native machine code and dont need any interpreter or virtual machine.
+- Go is not a native langugae unlike to C or C++ which are native language(compiled code will be run direcly on machine). Go has both compiler and runtime. Compiler will compile the go code to corresponding machine code, where as go runtime executes these byte codes line by line along with memory allocation and garbage collection support.
+- Go runtime also provides built in standard library, go concurrency management, cross platform complilation etc 
 - Garbage collected
 - Designed for multi core processor
 - Easy to read codes
 - Spend less time and money to develop an app
 - Use Go for a range of apps: We can use Go for system and network programming, big data, machine learning, audio and video editing etc
 - Worry less about the app crashing
+- Optimize the final code bundle through a concept called `tree shaking`, where during coding all the functions, variables of the imported package will be available. But during build process, tree shaking statically analysis the code base to determine which module and functions are directly imported and used. Only those needed function or modules will get added in the final executable by go compiler and linker, which makes the final bundle size as minimal. This will removes any dead or unused code from the bundle. React and Angular uses this concepts. This will improves the performance and the dependency management.
 
 ## Install Go in Mac
 - https://www.educative.io/answers/how-to-check-the-golang-version-on-mac
@@ -45,6 +48,11 @@ Readability, writing clear and simple less code, testing, code reviews, re-facto
     - export GOROOT=/usr/local/go 
     - export GOPATH=$HOME/go
     - export PATH=$GOPATH/bin:$GOROOT/bin:$PATH 
-
+- Go code is developed in a workspace. A workspace is made up of three directories, namely the following:
+    - bin: This will contain all you Go executable binaries.
+    - src: This will store your source files, which are organized in packages, with one subdirectory in the src directory representing one package.
+    - pkg: This will store your package objects.
+- The default directory for the Go workspace is the home directory with a go subdirectory or $HOME/go.
+- To install the tools, click on View | Command Pallete, or use the Ctrl + Shift + P shortcut and type `goinstall update/tools`
 
 

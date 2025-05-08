@@ -2,10 +2,12 @@
 https://github.com/ardanlabs/gotraining/tree/master/topics/go/language/constants
 
 Constants are a way to create a named identifier whose value can never change. 
-There are 2 varient of constants. Constants of kind and constants of type.
+There are 2 varient of constants. Constants of kind and constants of type or untype.
 
 - Constants are not variables.
 - They exist only at compilation. They never find themselves on a stack or on a heap.
+- Constants must be initalized during compile time with the value.
+- We can not use short declaration for constants
 - Literal values in Go are constant of kind. For example 2, -5, 2.34 etc
 - Untyped constants or constants of a kind can be implicitly converted where typed constants or constants of type and variables can't.
 - Constants of a kind can be implicitly converted by the compiler, which means we can not have **Enumerations** in Go.
@@ -13,8 +15,9 @@ There are 2 varient of constants. Constants of kind and constants of type.
 - Unassigned constants recieve previous value
 ```
 const (
-	a = "foo"
+	a = "foo" // const of untyped
 	b  // Value is "foo"
+	c int = 10 // const of typed
 )
 ```
 - We can assign expression, or concatinate operations to a Constant, since these are executes during compile time. But we can not assign a function call to a constant.

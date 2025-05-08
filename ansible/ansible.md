@@ -10,7 +10,6 @@ Because Ansible is all about automation, it requires instructions to accomplish 
 While Ansible may be at the forefront of automation, systems administration, and DevOps, it's also useful to everyday users. Ansible allows you to configure not just one computer, but potentially a whole network of computers at once, and using it requires no programming skills. Instructions written for Ansible are human-readable. Whether you're entirely new to computers or an expert, Ansible files are easy to understand.
 
 
-
 ### Why Ansible
 - Virtual Machine Provisioning
 - Configuration management
@@ -37,6 +36,12 @@ Lets consider another example where we are setting up a complex infrastructure t
 in Ansible that supports these kind of operations.
 
 --- 
+
+## Understanding Ansible terms and directory structure
+
+![stack_heap](00.drawio.png "icon")
+
+---
 
 ## Configuring and running inventory file (inventory.txt file)
 

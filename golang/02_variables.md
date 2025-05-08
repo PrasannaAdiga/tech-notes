@@ -6,25 +6,48 @@ https://github.com/ardanlabs/gotraining/tree/master/topics/go/language/variables
 - When variables are being declared to their zero value, use the keyword var.
 - When variables are being declared and initialized, use the short variable declaration operator.
 - Variables names should start with a letter or an underscore. Unicode letters are also ok.
+- Global variables can not be declared with short variable declaration operator. We have to declare it with var keyword.
 
 ## Declaration and Initialization
 - var a string - **zero value** or **null value**decalaration
 - a := "golang" - **Short variable** declaration operation, to declare and initialize at the same time
 
-## Types
+## Data Types
 - Type is everything in Go. Without this we can not have Integrity. Types refers to the types of values, because every value in Go is of specific type.
 - Go is a statically typed language not a dynamically typed language.
 - Type provides 2 pieces of information. Size of the memory that is being allocated and what that memory represents.
-- Go has built-in types like numeric, string and bool.
-- **Numeric**: int can be 8, 16 or 64 bits depending on the underlying architecture
-- **Float**: Float64
-- **Bool**:  0 or 1
-- int32 in Go is also called as `rune`
 
-Go has 3 different Types
-- Built-in types like numeric, float, bool, string, array and Error
-- User defined type like Struct
-- Reference types like slices, maps, interfaces, functions and channels. We consider all reference type as nil when we set it to zero value.
+**Go has 3 different Data Types**
+- Built-in types
+    - numeric/integer: int can be 8, 16 or 64 bits depending on the underlying architecture
+    - float: Float32 or Float64
+    - booleans
+    - strings
+    - constants
+    - arrayas
+    - Error
+- User defined type 
+    - Struct
+    - Enums
+- Reference types. We consider all reference type as nil when we set it to zero value.
+    - slices
+    - maps
+    - Pointers
+    - functions 
+    - method and interfaces
+    - channels 
+
+## Naming Convention
+- PascalCase
+    - Structs, interfaces, enums
+    - Example: CalculateArea, UserInfo
+- snake_case
+    - variables and file names
+    - Example: user_id, first_name
+- UPPERCASE
+    - constansts
+- mixedCase
+    - Variables or extenral libraries    
 
 ## Null value
 All Go value types come with a so-called "null value" which is the value stored in a variable if no other value is explicitly set.

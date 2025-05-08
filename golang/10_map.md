@@ -9,11 +9,11 @@ Maps provide a data structure that allow for the storage and management of key/v
 - The map key must be a value that is comparable.
 - Elements in a map are not addressable. We can cannot take the address of an element in a map. 
 - Maps are a reference type. The value of maps are shared across the program boundary.
-- Maps can not be used in the zero value state where as slices can be used. Maos has to be constructed.
+- Maps can not be used in the zero value state where as slices can be used. Maps has to be constructed.
 - Maps also uses value semantics similar like slices
 - We can create a map either by using make function literal construction similar way how we do in slices.
 - Maps are copied by reference hence it is not comparable with other maps.
-
+- We can have nil slice and empty slice. Where as we can not have nil map. We can have empty map through make command.
 ```
 // Sample program to show how to initialize a map, write to
 // it, then read and delete from it.
@@ -73,6 +73,10 @@ func main() {
 	}
 
 	fmt.Println("Goodbye.")
+
+	clear(users) // to delete the entire map
+
+	_, ok := users["Jackson"] // exist will have true value, this is helpfull to check whether a particular key exists in map.
 }
 
 O/P:
@@ -106,6 +110,8 @@ func main() {
 	courseRating.output()
 }
 ```
+
+- To compare two maps for the equality: `maps.Equal(map1, map2)`
 
 ### Map examples:
 

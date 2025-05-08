@@ -49,6 +49,16 @@ If a member starts with capital latter then that particular member or field of a
 
 # Modules
 
+If you're working within a team, you will need some way to ensure all team members are using the same Go version and packages. That's where Go modules come into the picture. Go modules were introduced in 2018 to make dependency management a lot easier.
+
+Contains go.mod and go.sum files
+
+To remove unused dependencies, you can use the `go mod tidy` command.
+
+A file called go.sum will be generated upon executing `go get` command for example for the Gin framework (the output was cropped for brevity). You may assume it's a lock file. But in fact, go.mod already provides enough information for 100% reproducible builds. The other file is just for validation purposes: it contains the expected cryptographic checksums of the content of specific module versions. You can think of it as an additional security layer to ensure that the modules your project depends on do not change unexpectedly, whether for malicious or accidental reasons.
+
+It's worth mentioning that the downloaded modules are stored locally in your $GOPATH/pkg/mod directory. However, sometimes, it's useful to store the modules or third-party packages that your project depends on and place them in a folder, so that they can be checked into version control. Fortunately, Go modules support vendoring `go mod vendor`. This command will create a vendor directory in your project folder that contains all your third-party dependencies. You can now commit this folder to your remote Git repository to ensure the stability of your future builds, without having to rely on external services
+
 **Create a Module**
 - We can create a new modules in Go by using command `go mod init github.com/username/gomodules`. This will create a go.mod file with below content
 ```

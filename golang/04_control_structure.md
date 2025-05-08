@@ -12,7 +12,58 @@
 ```
 - We can use either if/else if/else code block inside for loop or switch case. We can use `continue` sattements inside if/else if/else or switch case to continue the for loop to next iteration. But we can not use `break` statement in switch case to stop the current iteration of for loop, insated we have to use `return` statement. But the same `break` statement we can use in if/else if/else blocks
 - In `switch` cases we do not need `break` keyword to stop each case like in other languages. Also, the break sattement in switch case just stops that particular case, not any of the outer loop.
-- Example code
+- If we want to run the next case, then we can use the keywork `fallthrough` which will executes the immediate next case only. 
+- Example codes
+
+```
+// Simple iteration over a range
+for i := 1; i <= 5; i++ {
+	fmt.Println(i)
+}
+
+for v := range 10 {
+	fmt.Println(v)
+}
+
+// iterate over a collection
+numbers := [1, 2, 3, 4, 5]
+for index, value := range numbers {
+	fmt.Println(index, value)
+} 
+
+for index := range numbers {
+	fmt.Println(index)
+} 
+
+for _, value := range numbers {
+	fmt.Println(value)
+} 
+```
+
+
+```
+// For loop as while loop
+for { // infinite while loop
+	fmt.Println("Hello")
+}
+
+i := 1 // conditional while loop
+for i<=5 {
+	fmt.Println(i)
+	i++
+}
+
+sum := 0 // While loop with break
+for {
+	sum += 10
+	fmt.Println("Sum: ", sum)
+	if sum >= 50 {
+		break
+	}
+}
+```
+
+
 ```
 func main() {
 	accountBalance := 1000.0
@@ -202,5 +253,51 @@ func getUserInput(prompt string) string {
 	text = strings.TrimSuffix(text, "\n")
 	text = strings.TrimSuffix(text, "\r")
 	return text
+}
+```
+
+## Switch examples
+
+```
+day := "Monday"
+
+switch day {
+case "Monday", "Tuesday", "Wednesday",  "Thursday", "Friday":
+	fmt.Println("Its a weekday")
+case "Saturday", "Sunday":
+	fmt.Println("Its weekend")
+default:
+	fmt.Println("Its invalid day")
+}
+
+---
+
+num := 2
+
+switch {
+case num > 1:
+	fmt.Println("greater than 1")
+	fallthrough
+case num == 2:
+	fmt.Println("number is 2")
+default:
+	fmt.Println("not 2")	
+}
+
+---
+
+TypeSwitch
+
+func checktype(x interface{}) { // We can not use fallthrough in type switch
+	switch x.(type) {
+	case int:
+		fmt.println("int")
+	case float64:
+		fmt.println("float64")
+	case string:
+		fmt.println("string")	
+	default:
+		fmt.println("unknown")
+	}
 }
 ```

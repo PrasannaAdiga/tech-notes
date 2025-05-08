@@ -25,7 +25,7 @@ There are 2 kinds of slices:
   * |
   --- |
   0 |
-  0|
+  0 |
    
    Here pointer points to an empty struct `struct{}`
 
@@ -71,7 +71,7 @@ In the line `fmt.Println(fruits)` we are using value semantics, which means we a
 Here only the backing array will get created in the Heap and rest all will created in the stack frame or in data segmants which can get cleaned without GC in action.
 
 ## Appending slices
-We use the function append to add a new value to slices, and helps slice yo grow by its own. this function uses the value semantics. It gets its own copy of the slice value, mutates it and returns it back. 
+We use the function append to add a new value to slices, and helps slice to grow by its own. this function uses the value semantics. It gets its own copy of the slice value, mutates it and returns it back. Note that whenever the length and capacity of a slice becomes same, the append function will create a brand new slice and returns it. So that it does not refer to previous backing array. If there are any other reference on this previous backing array then there will be go memory leak which we need to be careful about.
 
 How append works?
 - It first gets its own copy of slice value
@@ -425,6 +425,10 @@ Length and capacity of second slice after reassign  3 3
 
    
 ```
+
+### Slices utility functions
+- To compare two slices for the equality: `slices.Equal(slice1, slice2)`
+
 
 - Declare and Length: https://go.dev/play/p/ydOJ1GHgR_Y
 - Reference Types: https://go.dev/play/p/WqDnss06_9E
