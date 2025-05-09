@@ -123,7 +123,7 @@ func main() {
 }
 ```
 
-#Quit channel or Done channel
+# Quit channel or Done channel
 ```
 package main
 

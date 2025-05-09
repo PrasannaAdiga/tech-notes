@@ -88,6 +88,8 @@ the value of i to one. But before thread 1 can write the value of i to memory, i
 So concurrent access to memory, leads to un-deterministic outcomes.
 
 ### Data Race
+Data corruption
+
 Example
 
 ```
@@ -112,6 +114,8 @@ We can avoid data races by following three ways:
 - Using communication and channels to ensure that a variable is updated by only one goroutine
 
 ### Race Condition
+Unpredicted order of execution
+
 Example
 ```
 i := 0
@@ -242,7 +246,9 @@ https://github.com/ardanlabs/gotraining/tree/master/topics/go/concurrency/gorout
 
 A Goroutine is a function executing concurrenlty with other goroutines in the same address space(OS thread). It is lightweight, costing little more that the allocation of stack space. 
 
-When we write a Go program, that program is going to interact with the Go runtime. And the specific part of the Go runtime which is called Go Scheduler. And this Go Scheduler will internally interact with the OS. Go routine sits between a Go program and Go scheduler. And between the Scheduler and OS the interactions happens through Threads. Threads are the tools used by OS to manage their Concurrency. Go Scheduler will map goroutines onto OS threads. 
+When we write a Go program, that program is going to interact with the Go runtime. And the specific part of the Go runtime which is called Go Scheduler. And this Go Scheduler will internally interact with the OS. Go routine sits between a Go program and Go scheduler. And between the Scheduler and OS the interactions happens through Threads. Threads are the tools used by OS to manage their Concurrency. Go Scheduler will map goroutines onto OS threads.  
+
+We can not return anything from goroutines to main goroutine. We can either use shared error varaible to propogate any error to main thread or we can use channels to communicate the data between main goroutine ot other goroutine
 
 **Goroutine States and Goroutine vs Threads**
 
@@ -318,6 +324,37 @@ func main() {
 	fmt.Println("done..")
 }
 
+```
+
+## Goroutines error handling
+Either by using shared error varaible or by using channels
+
+```
+package main
+
+import (
+	"errors"
+	"fmt"
+	"time"
+)
+
+func main() {
+	var err error
+	go func() {
+		err = doWork()
+	}()
+	time.Sleep(2 * time.Second)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("Work is done")
+	}
+}
+
+func doWork() error {
+	time.Sleep(1 * time.Second)
+	return errors.New("Error")
+}
 ```
 
 ## Goroutine client-server example
@@ -827,7 +864,6 @@ Terminating Program
 In the above code we are using 2 core processor by setting the value to `runtime.GOMAXPROCS(2)`. So both of the goroutines run at the same time in the available 2 cores or 2 P's or 2 OS threads and we can see mix of output from both goroutines at the same time not one after the other. 
 
 So now that we have went from one P(core) or thread to 2 thread or P, we are now a multi-threaded Go program. Go routines now can run in parallel and this is where synchronization, orchestration really become important.
-
 
 ## Goroutime Examples:
 - Goroutines and concurrency: https://go.dev/play/p/4n6G3uRDc83

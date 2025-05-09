@@ -117,3 +117,28 @@ O/P:
 - Parallel type system (Kind): https://go.dev/play/p/8a_tp97RHAf
 - iota: https://go.dev/play/p/SLAYYNFIdUA
 - Implicit conversion: https://go.dev/play/p/aB4NGcnZlw2
+
+# JSON
+
+```
+type Person struct{
+	FirstName string `json: "first_name"`
+	Age int `json: "age,omitempty"`
+}
+
+func main() {
+	person := Person{
+		FirstName: "Prasanna",
+		Age: 20
+	}
+
+	jsonData, err := json.Marshal(person)
+	if err != nil {
+		fmt.Error("Error")
+		return
+	}
+
+	fmt.Println(string(jsonData))
+}
+```
+
