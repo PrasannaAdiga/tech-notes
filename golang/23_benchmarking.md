@@ -3,6 +3,18 @@ https://github.com/ardanlabs/gotraining/tree/master/topics/go/testing/benchmarks
 
 Go has support for testing the performance of your code.
 
+# WRK - a HTTP benchmarking tool
+- Install WRK on mac or Linux
+- Use the below command to test the performance or load on a particular API
+
+```
+wrk -t8 -c400 -d30s "http://localhost:8080/person?id=1"
+
+-t = number of threads
+-c = number of concurrent connections
+-d = duration
+```
+
 ## Basic Benchmarking
 
 ```

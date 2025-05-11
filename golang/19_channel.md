@@ -117,30 +117,36 @@ func pong(in <-chan string, out chan<- string) {}
 ```
 package main
 
+import "fmt"
 
-func genMsg(ch1 chan<- string) {
-	// send message on ch1
-	ch1 <- "message"
+func producer(in chan<- int) {
+	for i := range 5 {
+		in <- i
+	}
+	close(in)
 }
 
-func relayMsg(ch1 <-chan string, ch2 chan<- string) {
-	// recv message on ch1
-	m := <- ch1
-	// send it on ch2
-	ch2 <- m
+func filter(in <-chan int, out chan<- int) {
+	for v := range in {
+		if v%2 == 0 {
+			out <- v
+		}
+	}
+	close(out)
 }
 
 func main() {
-	// create ch1 and ch2
-	ch1 := make(chan, string)
-	ch2 := make(chan, string)
-	// spin goroutine genMsg and relayMsg
-	go genMsg(ch1)
-	go relayMsg(ch1, ch2)
-	// recv message on ch2
-	v := <-ch2 
-	fmt.Println(v)
+	ch1 := make(chan int)
+	ch2 := make(chan int)
+
+	go producer(ch1)
+	go filter(ch1, ch2)
+
+	for val := range ch2 {
+		fmt.Println(val)
+	}
 }
+
 ```
 
 ### Channel Ownership
@@ -152,8 +158,11 @@ func main() {
 - The goroutine that creates writes and closes the channel is the owner of the channel and the goroutine that
 utilizes the channel will only read from the channel.
 - So establishing the ownership of the channel will help us to avoid deadlocks and panics, and it will
-help in avoiding scenarios like deadlocking by writing to nil channel, closing a nil channel, writing
-to a closed and closing channel more than once, which can all lead to panic.
+help in avoiding scenarios like:
+	- deadlocking by writing to nil channel, which will waits send and receive forever
+	- closing a nil channel which will trigger a panning 
+	- writing to a closed channel which will lead to panic
+	- closing channel more than once which will lead to panic
 ```
 package main
 
@@ -185,6 +194,88 @@ func main() {
 	ch := owner()
 	consumer(ch)
 }
+```
+
+### Use channel as signaling
+Use done channel for the signal
+
+```
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	done := make(chan struct{})
+
+	go func() {
+		fmt.Println("Working...")
+		time.Sleep(2 * time.Second)
+		done <- struct{}{}
+	}()
+
+	<-done
+	fmt.Println("Done")
+}
+```
+
+### Synchronize between goroutines using signaling channel
+
+```
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	done := make(chan int)
+
+	for i := range 3 {
+		go func(num int) {
+			fmt.Printf("goroutine %d\n", i)
+			done <- 1
+		}(i)
+	}
+
+	for range 3 {
+		<-done
+	}
+
+	fmt.Println("Done")
+}
+
+```
+### Synchronize between goroutines using range over channel
+
+```
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	data := make(chan string)
+
+	go func() {
+		defer close(data)
+		for i := range 5 {
+			data <- "Hello " + string('0'+i)
+			time.Sleep(1 * time.Second)
+		}
+	}()
+
+	for v := range data {
+		fmt.Println(v)
+	}
+
+	fmt.Println("Done")
+}
+
 ```
 
 ### Channels deep dive - How it works underneath
@@ -264,9 +355,9 @@ default case gets executed.
 
 Examples
 
-```
-Select
+#### Select
 
+```
 package main
 
 import (
@@ -300,9 +391,9 @@ func main() {
 }
 ```
 
-```
-Timeout
+#### Timeout
 
+```
 package main
 
 import (
@@ -329,11 +420,136 @@ func main() {
 }
 ```
 
+#### Ok channel
+
+If the channel is closed we should stop reading the message. Else, we keep receive the zero value message from the closed channel. 
+
+```
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	ch := make(chan string, 1)
+
+	go func() {
+		ch <- "one"
+		close(ch)
+	}()
+
+	for {
+		select {
+		case m, ok := <-ch:
+			if !ok {
+				fmt.Println("Channel is closed")
+				return // goes out of the surrouding function which is main function here
+			}
+			fmt.Println(m)
+		case <-time.After(3 * time.Second):
+			fmt.Println("Timeout")
+		}
+	}
+
+	fmt.Println("Done") // Non reachable code
+
+}
+
+```
+
+### Non blocking operations
+
+#### Non blocking receive operation
+
+```
+package main
+
+import "fmt"
+
+func main() {
+	ch := make(chan int)
+
+	select { // If we do not have this select statement then code will block in the below channel recevice statement
+	case msg := <-ch:
+		fmt.Println("Msg ", msg)
+	default:
+		fmt.Println("No message available")
+
+	}
+}
+```
+
+#### Non blocking send operation
+
+```
+package main
+
+import "fmt"
+
+func main() {
+	ch := make(chan int)
+
+	select { // If we do not have this select statement then code will block in the below channel recevice statement
+	case ch <- 1:
+		fmt.Println("Sent message")
+	default:
+		fmt.Println("Channel is not ready to recive")
+
+	}
+}
+
+```
+
+#### Use quit channel to send stop signal
+
+```
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	data := make(chan int)
+	quit := make(chan bool)
+
+	go func() {
+		for {
+			select { // Use for loop and selct statement in a sepaarte goroutine always so that we can stop it through quit channel
+			case v := <-data:
+				fmt.Println("Value received ", v)
+			case <-quit:
+				fmt.Println("Stopping...")
+				return
+			default:
+				time.Sleep(1 * time.Second)
+				fmt.Println("Waiting for the data...")
+			}
+		}
+	}()
+
+	for i := range 5 {
+		data <- i
+		time.Sleep(1 * time.Millisecond)
+	}
+
+	quit <- true
+
+	fmt.Println("Done")
+}
+
+```
+
 ### Guarantee of Delivery 
 
 A goroutine is going to send a signal to another goroutine which can receive this signal. Do we need a guarantee that a signal being sent by one goroutine has been received by another? Does the sending goroutine need a signal that that sent signal has been received? Now, if we need a guarantee, we are gonna be using the `unbuffered channel`. If we don't need guarantees, then we use `buffered channel`. 
 
 The guarantee comes in the fact that the send and recieve should happen in the same time in case of `buffered channel`. In-fact here **receive happens before the send**. The send came in, the receive came in, and receiver pulls this woerk from sender. But this will have a cost and the cost with signaling will be unknown latency. 
+
+Buffered channel helps for asynchronous communication where as unbuffered channel helps for synchronous communication.
 
 If we can not deal with this unknown latency, where sender has to wait until the receiver finishes his task and send done signal back the sender, we can use buffered channel. In case of buffered channel it will have some pre-defined space, where sender can put some task and continue with ots own work without waiting, where as receiver comes and pick this work at any time and finish the work to send done signal back to sender. **Here the send happens before the receive.** But this does not have any quarantee here. Receiver might not take this work. or there are no receiver to receive this task. If the buffer is full, sender again has to wait until there are some room in the buffer to send the data. 
 

@@ -136,6 +136,8 @@ go func() {
 
 Here depending on the order of goroutine executions, the value i can be either 1 or 2. So this is not a data race but race condition issue. A race condition occurs when the behavior depends on the sequence or the timing of events that can’t be controlled. Here, the timing of events is the goroutines’ execution order.  If we want to ensure that we first go from state 0 to state 1, and then from state 1 to state 2, we should find a way to guarantee that the goroutines are executed in order. Channels can be a way to solve this problem.
 
+To find a race condition in a file, use the command `go run -race file_name.go`
+
 ### The Go memory model
 The Go memory model is a specification that defines the conditions under which a read from a variable in one goroutine can be guaranteed to happen after a write to the same variable in a different goroutine. 
 Below are the few cases where there will be or will not be data races:
@@ -216,6 +218,53 @@ fmt.Println(i)
 - Now, thread2 comes along and it wants a lock on resource v1, but it is not available, so it also goes into
 waiting state.
 - So as you see, this is a circular wait, which leads to deadlock and the application will just hang.
+
+```
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+func main() {
+
+	var mu1, mu2 sync.Mutex
+
+	go func() {
+		mu1.Lock()
+		fmt.Println("Goroutine 1 locked mu1")
+		time.Sleep(time.Second)
+		mu2.Lock()
+		fmt.Println("Goroutine 1 locked mu2")
+		mu1.Unlock()
+		mu2.Unlock()
+		fmt.Println("Goroutine1 finished")
+	}()
+
+	go func() {
+		mu2.Lock()
+		fmt.Println("Goroutine 2 locked mu2")
+		time.Sleep(time.Second)
+		mu1.Lock()
+		fmt.Println("Goroutine 2 locked mu1")
+		mu2.Unlock()
+		mu1.Unlock()
+		fmt.Println("Goroutine2 finished")
+	}()
+
+	time.Sleep(3 * time.Second)
+	fmt.Println("Main function completed")
+	select {} // wait for a period of time that has no fixed end
+}
+
+O/P
+Goroutine 1 locked mu1
+Goroutine 2 locked mu2
+Main function completed
+fatal error: all goroutines are asleep - deadlock!
+```
 
 ![stack_heap](images/deadlock.drawio.png "icon")
 
@@ -628,7 +677,8 @@ func main() {
 
 	// wg is used to manage concurrency.
 	var wg sync.WaitGroup
-	wg.Add(2)
+	numOfWorkers := 2
+	wg.Add(numOfWorkers)
 
 	fmt.Println("Start Goroutines")
 
@@ -693,6 +743,99 @@ Built-in functions in the runtime package
 If we forget to add wg.Done() function call, then go runtime will through `fatal error: all goroutines are asleep - deadlock!`. The wait group no longer get to zero now, because we are not decrementing the counter which we set initially through wg.Add() function, the main goroutine has to wait continuously. But go runtime will detect this and through the above runtime error. Go runtime has a simple go deadlock detector, It can identify easily when every single goroutine is now in a waiting state and can never move back into a runnable state. 
 
 If we do not set the counter value properly according to the number of goroutines, then there could be some unwanted things will happen. For example in the above code if we set counter to 1 (i.e wg.Add(1)), then only one goroutine will run and the other one will get skipped, since the main go routine will terminate before executing the second one.
+
+### ***Waitgroup with channel***
+Use the channel to send the result
+
+```
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+func worker(id int, tasks <-chan int, result chan<- int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	fmt.Printf("Worker ID %d starting\n", id)
+	time.Sleep(time.Second)
+	for task := range tasks {
+		result <- task * 2
+	}
+	fmt.Printf("Worker ID %d finished\n", id)
+}
+
+func main() {
+	wg := sync.WaitGroup{}
+	numOfWorkers := 3
+	numOfJobs := 5
+
+	tasks := make(chan int, numOfJobs)
+	result := make(chan int, numOfJobs)
+
+	wg.Add(numOfWorkers)
+
+	for i := range numOfJobs {
+		tasks <- i + 1
+	}
+	close(tasks)
+
+	for i := range numOfWorkers {
+		go worker(i+1, tasks, result, &wg)
+	}
+
+	go func() {
+		wg.Wait()     // Wait for the wg in a separate goroutine since we do not want to block the main goroutine
+		close(result) // Close all the channels once all channel wait is done and values are sent
+	}()
+
+	for res := range result {
+		fmt.Println("Result: ", res)
+	}
+}
+
+```
+
+### **Waitgroups with structs**
+
+```
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+type Worker struct {
+	ID   int
+	Task string
+}
+
+func (w *Worker) performTasks(wg *sync.WaitGroup) {
+	defer wg.Done()
+	fmt.Printf("Worker ID %d started task %s\n", w.ID, w.Task)
+	time.Sleep(time.Second)
+	fmt.Printf("Worker ID %d finished task %s\n", w.ID, w.Task)
+}
+
+func main() {
+	wg := sync.WaitGroup{}
+
+	tasks := []string{"digging", "laying bricks", "painting"}
+
+	for i, task := range tasks {
+		worker := Worker{ID: i + 1, Task: task}
+		wg.Add(1)
+		go worker.performTasks(&wg)
+	}
+
+	wg.Wait()
+	fmt.Println("Consturuction finished")
+}
+
+```
 
 ## Goroutine time slicing
 ```

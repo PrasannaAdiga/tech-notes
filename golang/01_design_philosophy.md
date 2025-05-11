@@ -54,5 +54,3 @@ Readability, writing clear and simple less code, testing, code reviews, re-facto
     - pkg: This will store your package objects.
 - The default directory for the Go workspace is the home directory with a go subdirectory or $HOME/go.
 - To install the tools, click on View | Command Pallete, or use the Ctrl + Shift + P shortcut and type `goinstall update/tools`
-
-
