@@ -40,6 +40,64 @@ func boring(msg string) <-chan string { // Returns receive-only channel of strin
 }
 ```
 
+### Complete example
+
+```
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"sync"
+	"time"
+)
+
+func main() {
+	joe := boring("Joe")
+	ann := boring("Ann")
+
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		for v := range joe {
+			fmt.Println(v)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		for v := range ann {
+			fmt.Println(v)
+		}
+	}()
+	wg.Wait()
+	fmt.Println("You're both boring; I'm leaving.")
+}
+
+func boring(msg string) <-chan string {
+	c := make(chan string)
+	go func() {
+		for i := 0; i < 2; i++ {
+			s := fmt.Sprintf("%s %d", msg, i)
+
+			c <- s
+			time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
+		}
+		close(c)
+	}()
+	return c
+}
+
+O/P:
+Joe 0
+Ann 0
+Ann 1
+Joe 1
+You're both boring; I'm leaving.
+```
+
 # Fan-in or Multiplexing pattern
 The above generator pattern makes Joe and Ann wait for other one to complete.
 We can instead use a fan-in function to let whosoever is ready talk.
@@ -82,6 +140,84 @@ func main() {
     fmt.Println("You're both boring; I'm leaving.")
 }
 ```
+
+### Complete example 
+
+```
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"sync"
+	"time"
+)
+
+func main() {
+	joe := boring("Joe")
+	ann := boring("Ann")
+
+	out := fanIn(joe, ann)
+
+	for v := range out {
+		fmt.Println(v)
+	}
+
+	fmt.Println("You're both boring; I'm leaving.")
+}
+
+func fanIn(in1, in2 <-chan string) <-chan string {
+	out := make(chan string)
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for {
+			select {
+			case v1, ok := <-in1:
+				if !ok {
+					return
+				}
+				out <- v1
+			case v2, ok := <-in2:
+				if !ok {
+					return
+				}
+				out <- v2
+			}
+		}
+	}()
+
+	go func() {
+		wg.Wait()
+		close(out)
+	}()
+	return out
+}
+
+func boring(msg string) <-chan string {
+	c := make(chan string)
+	go func() {
+		for i := 0; i < 2; i++ {
+			s := fmt.Sprintf("%s %d", msg, i)
+
+			c <- s
+			time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
+		}
+		close(c)
+	}()
+	return c
+}
+
+O/P:
+Joe 0
+Ann 0
+Joe 1
+Ann 1
+You're both boring; I'm leaving.
+```
+
 
 # Slect-timeout
 ```
@@ -600,6 +736,60 @@ Here the run time, the run time, okay, will come in, the run time will come in o
 Here in the select statememnt the main go routine is trying to receive the data from 2 channels, one is our buffer channel and the other one is timer channel. So timer will send the signal after 100 milli second to its channel, where as the goroutine send the data to its channel after 500 milli second. Since timer channel sends the data first, the corresponding select clause will be running, and then the main thread will continue instead of waiting for the child goroutine. 
 
 If we use the unbuffered channel here instead of buffered, then this will have a goroutine leak where the child goroutine will continue to get blocked for the corresponding receive operation. 
+
+### http cancellation example
+
+```
+package main
+
+import (
+	"context"
+	"io"
+	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
+)
+
+func fetchData(c *gin.Context) {
+	// Set a timeout for the HTTP request
+	timeout := 2 * time.Second
+	ctx, cancel := context.WithTimeout(c.Request.Context(), timeout)
+	defer cancel()
+
+	// Create a new HTTP request with the context
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://httpbin.org/delay/0", nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
+		return
+	}
+
+	// Perform the HTTP request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		c.JSON(http.StatusRequestTimeout, gin.H{"error": "Request timed out"})
+		return
+	}
+	defer resp.Body.Close()
+
+	// Read and return the response
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"response": string(body)})
+}
+
+func main() {
+	r := gin.Default()
+	r.GET("/fetch", fetchData)
+	r.Run(":8080")
+}
+
+```
 
 ![stack_heap](images/channels_advanced_patterns.drawio.png "icon")
 

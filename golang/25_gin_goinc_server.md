@@ -510,5 +510,58 @@ func (u *User) ValidateCredentials() error {
 
 ```
 
+## Call another API from gin-gonic with context timeout
 
-# Smaple go GRPC poject
+```
+package main
+
+import (
+	"context"
+	"io"
+	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
+)
+
+func fetchData(c *gin.Context) {
+	// Set a timeout for the HTTP request
+	timeout := 2 * time.Second
+	ctx, cancel := context.WithTimeout(c.Request.Context(), timeout)
+	defer cancel()
+
+	// Create a new HTTP request with the context
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://httpbin.org/delay/0", nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
+		return
+	}
+
+	// Perform the HTTP request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		c.JSON(http.StatusRequestTimeout, gin.H{"error": "Request timed out"})
+		return
+	}
+	defer resp.Body.Close()
+
+	// Read and return the response
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"response": string(body)})
+}
+
+func main() {
+	r := gin.Default()
+	r.GET("/fetch", fetchData)
+	r.Run(":8080")
+}
+
+```
+
+# Sample go GRPC poject

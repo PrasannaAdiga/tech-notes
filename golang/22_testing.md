@@ -14,6 +14,48 @@ Testing is built right into the go tools and the standard library. Testing needs
 ## Basic Unit Test
 
 ```
+package main
+
+func main() {
+	Add(1, 2)
+}
+
+func Add(a, b int) int {
+	return a + b
+}
+
+```
+
+```
+package main
+
+import (
+	"fmt"
+	"testing"
+)
+
+func TestAdd(t *testing.T) {
+	tests := []struct {
+		a, b, want int
+	}{
+		{2, 3, 5},
+		{4, 5, 9},
+		{0, 0, 0},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%d+%d", tt.a, tt.b), func(t *testing.T) {
+			got := Add(tt.a, tt.b)
+			if got != tt.want {
+				t.Errorf("Add(%d, %d) = %d; want %d", tt.a, tt.b, got, tt.want)
+			}
+		})
+	}
+}
+
+```
+
+
+```
 // Sample test to show how to write a basic unit test.
 package example1
 
